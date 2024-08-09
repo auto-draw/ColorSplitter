@@ -1,20 +1,88 @@
-<Window xmlns="https://github.com/avaloniaui"
+<Window x:Class="csp.Views.MainWindow"
+        xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:csp.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="csp.Views.MainWindow"
+        xmlns:vm="using:csp.ViewModels"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="csp">
+        
+        xmlns:avaloniaControls="clr-namespace:UVtools.AvaloniaControls;assembly=UVtools.AvaloniaControls"
 
+        mc:Ignorable="d" d:DesignWidth="588" d:DesignHeight="480"
+        x:Name="csp"
+        
+        Width="580"
+        Height="450"
+        CanResize="True"
+        DragDrop.AllowDrop="False"
+
+        MinWidth="580"
+        MinHeight="450"
+        WindowStartupLocation="CenterScreen"
+        
+        Title="csp"
+
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="20">
+    
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid RowDefinitions="20,1*">
+        <!--Toolbar-->
+        <Canvas Grid.Row="0" Width="{Binding $parent[Window].Bounds.Width}" Height="20">
+            <!--Background-->
+            <Canvas Classes="Toolbar ClickThru" Width="{Binding $parent[Window].Bounds.Width}" Height="20" />
 
+            <!--Decorations-->
+            <StackPanel Classes="Toolbar" Orientation="Horizontal">
+                <Label Classes="Title Bold ClickThru" Margin="0" Padding="6 0 0 0" Height="20"
+                       VerticalContentAlignment="Center" Content="Color Splitter - Release Build"/>
+            </StackPanel>
+
+            <!--Buttons-->
+            <Grid Name="ToolbarButtons" Classes="ToolbarButtons" Width="{Binding $parent[Window].Bounds.Width}"
+                  ColumnDefinitions="*,20,20,20">
+                <Button Classes="MinimizeApp ToolbarButton" Name="MinimizeAppButton" Grid.Column="2" Width="20"
+                        Height="20" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+                        Padding="0">
+                    -
+                </Button>
+                <Button Classes="CloseApp ToolbarButton" Name="CloseAppButton" Grid.Column="3" Width="20" Height="20"
+                        FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0">
+                    <Image Classes="CloseApp ToolbarButton" />
+                </Button>
+            </Grid>
+        </Canvas>
+
+        <!--Body Stuff-->
+        <Image Classes="MainBody" Grid.Row="1" />
+        <Image Classes="MainBodySecond" Grid.Row="1" />
+        <Image Classes="MainBodyThird" Grid.Row="1" />
+
+        <Grid Classes="Body" Grid.Row="1" Name="Body" Margin="8" RowDefinitions="*,8,32" ColumnDefinitions="3*,8,300">
+            <Grid Grid.Column="0" Grid.RowSpan="3" RowDefinitions="1*,48,26,4">
+                <Canvas Classes="ImagePreview" Width="{Binding $parent.Bounds.Width}" VerticalAlignment="Stretch">
+                    <Canvas.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Name="ImageAIGeneration" Header="AI Generation"/>
+                            <MenuItem Name="ImageSaveImage" Header="Save Image"/>
+                            <MenuItem Name="ImageClearImage" Header="Clear Image"/>
+                        </ContextMenu>
+                    </Canvas.ContextMenu>
+                    <Border Classes="ImagePreview" Width="{Binding $parent.Bounds.Width}" IsHitTestVisible="False"
+                            Height="{Binding $parent.Bounds.Height}">
+                    </Border>
+                    <avaloniaControls:AdvancedImageBox Name="ImagePreview" ShowGrid="False"
+                        Width="{Binding $parent.Bounds.Width}" Height="{Binding $parent.Bounds.Height}">
+                    </avaloniaControls:AdvancedImageBox>
+                </Canvas>
+            </Grid>
+            
+        </Grid>
+    </Grid>
 </Window>

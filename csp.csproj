@@ -6,20 +6,34 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Models\"/>
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.0.10"/>
-        <PackageReference Include="Avalonia.Desktop" Version="11.0.10"/>
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.10"/>
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.10"/>
+        <AvaloniaResource Include="Styles\Overridess\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.1.2" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.1.2" />
+        <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.1.2" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.1.2" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.1.2" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.10"/>
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.10"/>
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.1.2" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.1.2" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="SkiaSharp" Version="3.0.0-preview.4.1" />
+        <PackageReference Include="UVtools.AvaloniaControls" Version="3.0.5" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Styles\Landscape\landscape.axaml" />
+      <UpToDateCheckInput Remove="Assets\Sounds\alert.wav" />
+      <UpToDateCheckInput Remove="Assets\Sounds\Music.mp3" />
     </ItemGroup>
 </Project>

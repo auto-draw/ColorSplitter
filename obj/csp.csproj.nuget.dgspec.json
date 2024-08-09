@@ -1,32 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\alexdalas\\Documents\\GitHub\\csp\\csp.csproj": {}
+    "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\csp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\alexdalas\\Documents\\GitHub\\csp\\csp.csproj": {
+    "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\csp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\alexdalas\\Documents\\GitHub\\csp\\csp.csproj",
+        "projectUniqueName": "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\csp.csproj",
         "projectName": "csp",
-        "projectPath": "C:\\Users\\alexdalas\\Documents\\GitHub\\csp\\csp.csproj",
-        "packagesPath": "C:\\Users\\alexdalas\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\alexdalas\\Documents\\GitHub\\csp\\obj\\",
+        "projectPath": "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\csp.csproj",
+        "packagesPath": "C:\\Users\\Siydge\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\alexdalas\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Siydge\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -47,27 +40,43 @@
           "dependencies": {
             "Avalonia": {
               "target": "Package",
-              "version": "[11.0.10, )"
+              "version": "[11.1.2, )"
             },
             "Avalonia.Desktop": {
               "target": "Package",
-              "version": "[11.0.10, )"
+              "version": "[11.1.2, )"
             },
             "Avalonia.Diagnostics": {
               "target": "Package",
-              "version": "[11.0.10, )"
+              "version": "[11.1.2, )"
             },
             "Avalonia.Fonts.Inter": {
               "target": "Package",
-              "version": "[11.0.10, )"
+              "version": "[11.1.2, )"
+            },
+            "Avalonia.Markup.Xaml.Loader": {
+              "target": "Package",
+              "version": "[11.1.2, )"
             },
             "Avalonia.ReactiveUI": {
               "target": "Package",
-              "version": "[11.0.10, )"
+              "version": "[11.1.2, )"
             },
             "Avalonia.Themes.Fluent": {
               "target": "Package",
-              "version": "[11.0.10, )"
+              "version": "[11.1.2, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
+            "SkiaSharp": {
+              "target": "Package",
+              "version": "[3.0.0-preview.4.1, )"
+            },
+            "UVtools.AvaloniaControls": {
+              "target": "Package",
+              "version": "[3.0.5, )"
             }
           },
           "imports": [
@@ -86,7 +95,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.300/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

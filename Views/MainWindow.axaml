@@ -25,6 +25,9 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="20">
+    <Window.Styles>
+        <StyleInclude Source="avares://UVtools.AvaloniaControls/Controls.axaml"/>
+    </Window.Styles>
     
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -78,7 +81,7 @@
                             Height="{Binding $parent.Bounds.Height}">
                     </Border>
                     <avaloniaControls:AdvancedImageBox Name="ImagePreview" ShowGrid="False"
-                        Width="{Binding $parent.Bounds.Width}" Height="{Binding $parent.Bounds.Height}">
+                                                       Width="{Binding $parent.Bounds.Width}" Height="{Binding $parent.Bounds.Height}">
                     </avaloniaControls:AdvancedImageBox>
                 </Canvas>
             </Grid>

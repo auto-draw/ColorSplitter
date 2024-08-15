@@ -22,6 +22,6 @@ public partial class MainWindow : Window
 
         _previewBitmap = _rawBitmap.ConvertToAvaloniaBitmap();
         
-        ImagePreview.Image = _previewBitmap;
+        //ImagePreview.Image = _previewBitmap;
     }
 }

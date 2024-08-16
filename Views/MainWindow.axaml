@@ -3,10 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="using:csp.ViewModels"
-        x:DataType="vm:MainWindowViewModel"
+        xmlns:local="using:csp"
+        x:DataType="global:MainWindowViewModel"
         
         xmlns:avaloniaControls="clr-namespace:UVtools.AvaloniaControls;assembly=UVtools.AvaloniaControls"
+        xmlns:global="clr-namespace:"
+        xmlns:views="clr-namespace:csp.Views"
 
         mc:Ignorable="d" d:DesignWidth="588" d:DesignHeight="480"
         x:Name="csp"
@@ -25,14 +27,25 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="20">
+    <Design.DataContext>
+        <global:MainWindowViewModel/>
+    </Design.DataContext>
+    
     <Window.Styles>
         <StyleInclude Source="avares://UVtools.AvaloniaControls/Controls.axaml"/>
     </Window.Styles>
     
+    
+    <Window.DataTemplates>
+        <DataTemplate DataType="{x:Type views:colorButton}">
+            <Button Width="14" Height="14" BorderThickness="0" Margin="2"></Button>
+        </DataTemplate>
+    </Window.DataTemplates>
+    
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
+        <global:MainWindowViewModel/>
     </Design.DataContext>
 
     <Grid RowDefinitions="20,1*">
@@ -67,23 +80,40 @@
         <Image Classes="MainBodySecond" Grid.Row="1" />
         <Image Classes="MainBodyThird" Grid.Row="1" />
 
-        <Grid Classes="Body" Grid.Row="1" Name="Body" Margin="8" RowDefinitions="*,8,32" ColumnDefinitions="3*,8,300">
-            <Grid Grid.Column="0" Grid.RowSpan="3" RowDefinitions="1*,48,26,4">
-                <Canvas Classes="ImagePreview" Width="{Binding $parent.Bounds.Width}" VerticalAlignment="Stretch">
+        <Grid Classes="Body" Grid.Row="1" Name="Body" ColumnDefinitions="330*,250*">
+            <Grid Grid.Column="0" RowDefinitions="250*,16,180*" Margin="8">
+                <Canvas Grid.Row="0" Classes="ImagePreview" VerticalAlignment="Stretch">
                     <Canvas.ContextMenu>
                         <ContextMenu>
+                            <!--
                             <MenuItem Name="ImageAIGeneration" Header="AI Generation"/>
                             <MenuItem Name="ImageSaveImage" Header="Save Image"/>
                             <MenuItem Name="ImageClearImage" Header="Clear Image"/>
+                            -->
                         </ContextMenu>
                     </Canvas.ContextMenu>
-                    <Border Classes="ImagePreview" Width="{Binding $parent.Bounds.Width}" IsHitTestVisible="False"
-                            Height="{Binding $parent.Bounds.Height}">
-                    </Border>
                     <avaloniaControls:AdvancedImageBox Name="ImagePreview" ShowGrid="False"
-                                                       Width="{Binding $parent.Bounds.Width}" Height="{Binding $parent.Bounds.Height}">
+                        Width="{Binding $parent.Bounds.Width}" Height="{Binding $parent.Bounds.Height}">
                     </avaloniaControls:AdvancedImageBox>
                 </Canvas>
+                <Grid Grid.Row="2" ColumnDefinitions="153*,8*,153*">
+                    <Grid Grid.Column="0" RowDefinitions="15,20,*">
+                        <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Colors:</Label>
+                        <Canvas Grid.Row="1" Grid.RowSpan="2" Background="#3000"></Canvas>
+                        <ScrollViewer Grid.Row="2" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Visible" BorderThickness="2">
+                            <WrapPanel Margin="4" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                <ContentControl Content="{Binding ColorsContent}">
+                                    <ContentControl.ContentTemplate>
+                                        <local:ViewLocator></local:ViewLocator>
+                                    </ContentControl.ContentTemplate>
+                                    
+                                </ContentControl>
+                                
+                            </WrapPanel>
+                        </ScrollViewer>
+                        <TextBox Grid.Row="1" CornerRadius="4" Background="#3000" BorderBrush="#8cffffff" Width="48" Margin="2"></TextBox>
+                    </Grid>
+                </Grid>
             </Grid>
             
         </Grid>

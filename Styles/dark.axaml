@@ -1,7 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Style Selector="Window">
-        <Setter Property="Background" Value="#9555" />
+        <Setter Property="Background" Value="#99555555" />
         <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
     </Style>
 
@@ -15,10 +15,10 @@
     </Style>
 
     <Style Selector="Canvas.Toolbar">
-        <Setter Property="Background" Value="#222" />
+        <Setter Property="Background" Value="#222222" />
     </Style>
     <Style Selector="Canvas.ImagePreview">
-        <Setter Property="Background" Value="#8000" />
+        <Setter Property="Background" Value="#59000000" />
     </Style>
 
     <Style Selector="Border.ImagePreview">

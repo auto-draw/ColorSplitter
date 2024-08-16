@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
@@ -8,10 +10,16 @@ using SkiaSharp;
 
 namespace csp.Views;
 
+
+public class colorButton
+{
+}
+
 public partial class MainWindow : Window
 {
     private SKBitmap _rawBitmap = new SKBitmap();
     private Bitmap _previewBitmap;
+    public object ColorsContent => new colorButton() ;
     
     public MainWindow()
     {
@@ -22,6 +30,13 @@ public partial class MainWindow : Window
         //MinimizeAppButton.Click += (_, _) => WindowState = WindowState.Minimized;
         
         // Image components
+        
+        var template = new FuncDataTemplate<colorButton>((value, namescope) =>
+            new TextBlock
+            {
+                [!TextBlock.TextProperty] = new Binding("FirstName"),
+            });
+        
         MinimizeAppButton.Click += ImageButton;
     }
 

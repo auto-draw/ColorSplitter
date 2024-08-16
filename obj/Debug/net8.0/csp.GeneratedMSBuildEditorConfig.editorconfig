@@ -15,24 +15,24 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = csp
-build_property.ProjectDir = C:\Users\alex\Documents\GitHub\csp\
+build_property.ProjectDir = C:\Users\Siydge\Desktop\GitHub\csp\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 
-[C:/Users/alex/Documents/GitHub/csp/App.axaml]
+[C:/Users/Siydge/Desktop/GitHub/csp/App.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[C:/Users/alex/Documents/GitHub/csp/Styles/dark.axaml]
+[C:/Users/Siydge/Desktop/GitHub/csp/Styles/dark.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[C:/Users/alex/Documents/GitHub/csp/Styles/light.axaml]
+[C:/Users/Siydge/Desktop/GitHub/csp/Styles/light.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[C:/Users/alex/Documents/GitHub/csp/Styles/Overrides/CheckBox.axaml]
+[C:/Users/Siydge/Desktop/GitHub/csp/Styles/Overrides/CheckBox.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[C:/Users/alex/Documents/GitHub/csp/Styles/universal.axaml]
+[C:/Users/Siydge/Desktop/GitHub/csp/Styles/universal.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[C:/Users/alex/Documents/GitHub/csp/Views/MainWindow.axaml]
+[C:/Users/Siydge/Desktop/GitHub/csp/Views/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml

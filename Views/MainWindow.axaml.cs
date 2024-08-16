@@ -51,7 +51,7 @@ public partial class MainWindow : Window
         _rawBitmap.Dispose();
         _rawBitmap = img is null ? SKBitmap.Decode(path).NormalizeColor() : SKBitmap.Decode(img).NormalizeColor();
         
-        _previewBitmap = _rawBitmap.NormalizeColor().ConvertToAvaloniaBitmap();
+        _previewBitmap = _rawBitmap.ConvertToAvaloniaBitmap();
         
         ImagePreview.Image = _previewBitmap;
     }

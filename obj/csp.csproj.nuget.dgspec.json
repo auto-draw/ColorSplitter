@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\alex\\Documents\\GitHub\\csp\\csp.csproj": {}
+    "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\csp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\alex\\Documents\\GitHub\\csp\\csp.csproj": {
+    "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\csp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\alex\\Documents\\GitHub\\csp\\csp.csproj",
+        "projectUniqueName": "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\csp.csproj",
         "projectName": "csp",
-        "projectPath": "C:\\Users\\alex\\Documents\\GitHub\\csp\\csp.csproj",
-        "packagesPath": "C:\\Users\\alex\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\alex\\Documents\\GitHub\\csp\\obj\\",
+        "projectPath": "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\csp.csproj",
+        "packagesPath": "C:\\Users\\Siydge\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\alex\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Siydge\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -40,11 +40,11 @@
           "dependencies": {
             "Avalonia": {
               "target": "Package",
-              "version": "[11.1.2, )"
+              "version": "[11.1.3, )"
             },
             "Avalonia.Desktop": {
               "target": "Package",
-              "version": "[11.1.2, )"
+              "version": "[11.1.3, )"
             },
             "Avalonia.Diagnostics": {
               "target": "Package",
@@ -95,7 +95,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Users\\alex\\.dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.300/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

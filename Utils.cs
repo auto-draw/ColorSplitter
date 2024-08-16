@@ -8,7 +8,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SkiaSharp;
 using Formatting = Newtonsoft.Json.Formatting;
-using Vector = Avalonia.Vector;
 
 namespace csp;
 
@@ -16,13 +15,65 @@ public static class ImageExtensions
 {
     public static Bitmap ConvertToAvaloniaBitmap(this SKBitmap bitmap)
     {
-        return new Bitmap
-        (PixelFormat.Bgra8888, AlphaFormat.Premul,
-            bitmap.GetPixels(),
-            new PixelSize(bitmap.Width, bitmap.Height),
-            new Vector(96, 96),
-            bitmap.GetPixelSpan().Length
-        );
+        //terrible
+        return new Bitmap(bitmap.Encode(SKEncodedImageFormat.Png, 100).AsStream());
+    }
+
+    public static unsafe SKBitmap NormalizeColor(this SKBitmap SourceBitmap)
+    {
+        var srcColor = SourceBitmap.ColorType;
+        var srcAlpha = SourceBitmap.AlphaType;
+
+        if (srcColor == SKColorType.Bgra8888) return SourceBitmap;
+        // Ensure we don't need to normalize it.
+
+        SKBitmap OutputBitmap = new(SourceBitmap.Width, SourceBitmap.Height);
+
+        var srcPtr = (byte*)SourceBitmap.GetPixels().ToPointer();
+        var dstPtr = (byte*)OutputBitmap.GetPixels().ToPointer();
+
+        var width = OutputBitmap.Width;
+        var height = OutputBitmap.Height;
+
+        var outColor = OutputBitmap.ColorType;
+
+        for (var row = 0; row < height; row++)
+        for (var col = 0; col < width; col++)
+            if (srcColor == SKColorType.Gray8 || srcColor == SKColorType.Alpha8)
+            {
+                var b = *srcPtr++;
+                *dstPtr++ = b;
+                *dstPtr++ = b;
+                *dstPtr++ = b;
+                *dstPtr++ = 255;
+            }
+            else if (srcColor == SKColorType.Rgba8888)
+            {
+                var r = *srcPtr++;
+                var g = *srcPtr++;
+                var b = *srcPtr++;
+                var a = *srcPtr++;
+                *dstPtr++ = b;
+                *dstPtr++ = g;
+                *dstPtr++ = r;
+                *dstPtr++ = a;
+            }
+            else if (srcColor == SKColorType.Argb4444)
+            {
+                var r = *srcPtr++;
+                var g = *srcPtr++;
+                var b = *srcPtr++;
+                var a = *srcPtr++;
+                *dstPtr++ = (byte)(b * 2);
+                *dstPtr++ = (byte)(g * 2);
+                *dstPtr++ = (byte)(r * 2);
+                *dstPtr++ = (byte)(a * 2);
+            }
+
+        SourceBitmap.Dispose();
+        SourceBitmap = OutputBitmap;
+
+        return SourceBitmap;
     }
 }
 
@@ -102,64 +153,6 @@ public static class Utils
     public static string LogsPath = Path.Combine(LogFolder, $"{DateTime.Now:dd.MM.yyyy}.txt");
     public static bool LoggingEnabled = Config.GetEntry("logsEnabled") == "True";
     public static StreamWriter? LogObject;
-
-    public static unsafe SKBitmap NormalizeColor(this SKBitmap SourceBitmap)
-    {
-        var srcColor = SourceBitmap.ColorType;
-        var srcAlpha = SourceBitmap.AlphaType;
-
-        if (srcColor == SKColorType.Bgra8888) return SourceBitmap;
-        // Ensure we don't need to normalize it.
-
-        SKBitmap OutputBitmap = new(SourceBitmap.Width, SourceBitmap.Height);
-
-        var srcPtr = (byte*)SourceBitmap.GetPixels().ToPointer();
-        var dstPtr = (byte*)OutputBitmap.GetPixels().ToPointer();
-
-        var width = OutputBitmap.Width;
-        var height = OutputBitmap.Height;
-
-        var outColor = OutputBitmap.ColorType;
-
-        for (var row = 0; row < height; row++)
-        for (var col = 0; col < width; col++)
-            if (srcColor == SKColorType.Gray8 || srcColor == SKColorType.Alpha8)
-            {
-                var b = *srcPtr++;
-                *dstPtr++ = b;
-                *dstPtr++ = b;
-                *dstPtr++ = b;
-                *dstPtr++ = 255;
-            }
-            else if (srcColor == SKColorType.Rgba8888)
-            {
-                var r = *srcPtr++;
-                var g = *srcPtr++;
-                var b = *srcPtr++;
-                var a = *srcPtr++;
-                *dstPtr++ = b;
-                *dstPtr++ = g;
-                *dstPtr++ = r;
-                *dstPtr++ = a;
-            }
-            else if (srcColor == SKColorType.Argb4444)
-            {
-                var r = *srcPtr++;
-                var g = *srcPtr++;
-                var b = *srcPtr++;
-                var a = *srcPtr++;
-                *dstPtr++ = (byte)(b * 2);
-                *dstPtr++ = (byte)(g * 2);
-                *dstPtr++ = (byte)(r * 2);
-                *dstPtr++ = (byte)(a * 2);
-            }
-
-        SourceBitmap.Dispose();
-        SourceBitmap = OutputBitmap;
-
-        return SourceBitmap;
-    }
-    
     public static void Log(string text)
     {
         Debug.WriteLine(text);

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\csp.csproj": {}
+    "C:\\Users\\alex\\Documents\\GitHub\\csp\\csp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\csp.csproj": {
+    "C:\\Users\\alex\\Documents\\GitHub\\csp\\csp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\csp.csproj",
+        "projectUniqueName": "C:\\Users\\alex\\Documents\\GitHub\\csp\\csp.csproj",
         "projectName": "csp",
-        "projectPath": "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\csp.csproj",
-        "packagesPath": "C:\\Users\\Siydge\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Siydge\\Desktop\\GitHub\\csp\\obj\\",
+        "projectPath": "C:\\Users\\alex\\Documents\\GitHub\\csp\\csp.csproj",
+        "packagesPath": "C:\\Users\\alex\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\alex\\Documents\\GitHub\\csp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Siydge\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\alex\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -72,7 +72,7 @@
             },
             "SkiaSharp": {
               "target": "Package",
-              "version": "[3.0.0-preview.4.1, )"
+              "version": "[2.88.8, )"
             },
             "UVtools.AvaloniaControls": {
               "target": "Package",
@@ -95,7 +95,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Users\\alex\\.dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

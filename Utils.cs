@@ -84,48 +84,12 @@ public class Config
 
     public static string ConfigPath = Path.Combine(FolderPath, "config.json");
     public static string ThemesPath = Path.Combine(FolderPath, "Themes");
-    public static string CachePath = Path.Combine(FolderPath, "Cache");
 
     public static void init()
     {
-        Directory.CreateDirectory(FolderPath);
-        if (!File.Exists(ConfigPath))
-        {
-            JObject obj = new();
-            // Migrates old directory list path (from AutoDraw v1) to the new config file
-            var OldPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "AutoDraw");
-            if (File.Exists(Path.Combine(OldPath, "dir.txt")) &&
-                File.ReadAllText(Path.Combine(OldPath, "dir.txt")).Length != 0)
-                obj.Add("ConfigFolder", File.ReadAllText(Path.Combine(OldPath, "dir.txt")));
-            var emptyJObject = JsonConvert.SerializeObject(obj);
-            File.WriteAllText(ConfigPath, emptyJObject);
-            
-        }
+        if (!File.Exists(ConfigPath)) return;
 
-        Utils.Copy(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Styles"), ThemesPath);
-        
-        // Check Configuration Path for Themes
-        if (GetEntry("SavedThemesPath") is null || !Directory.Exists(GetEntry("SavedPath")))
-        {
-            Directory.CreateDirectory(ThemesPath);
-            SetEntry("SavedThemesPath", ThemesPath);
-        }
-        else
-        {
-            ThemesPath = GetEntry("SavedThemesPath")!;
-        }
-        
-        // Check Configuration Path for Cache
-        if (GetEntry("SavedCachePath") is null || !Directory.Exists(GetEntry("SavedPath")))
-        {
-            Directory.CreateDirectory(CachePath);
-            SetEntry("SavedCachePath", CachePath);
-        }
-        else
-        {
-            CachePath = GetEntry("SavedCachePath")!;
-        }
+        //Utils.Copy(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Styles"), ThemesPath);
     }
 
     public static string? GetEntry(string entry)
@@ -135,16 +99,6 @@ public class Config
         var parse = JObject.Parse(json);
         return (string?)parse[entry];
     }
-
-    public static bool SetEntry(string entry, string data)
-    {
-        if (!File.Exists(ConfigPath)) return false;
-        var json = File.ReadAllText(ConfigPath);
-        var jsonFile = JObject.Parse(json);
-        jsonFile[entry] = data;
-        File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(jsonFile, Formatting.Indented));
-        return true;
-    }
 }
 
 public static class Utils
@@ -153,15 +107,6 @@ public static class Utils
     public static string LogsPath = Path.Combine(LogFolder, $"{DateTime.Now:dd.MM.yyyy}.txt");
     public static bool LoggingEnabled = Config.GetEntry("logsEnabled") == "True";
     public static StreamWriter? LogObject;
-    public static void Log(string text)
-    {
-        Debug.WriteLine(text);
-        if (!LoggingEnabled) return;
-        if (!Directory.Exists(LogFolder)) Directory.CreateDirectory(LogFolder);
-        if (LogObject == null) LogObject = new StreamWriter(LogsPath);
-        LogObject.WriteLine(text);
-        LogObject.Flush();
-    }
 
     public static void Copy(string sourceDirectory, string targetDirectory)
     {

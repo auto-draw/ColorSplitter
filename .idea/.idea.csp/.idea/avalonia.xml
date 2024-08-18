@@ -4,6 +4,8 @@
     <option name="projectPerEditor">
       <map>
         <entry key="App.axaml" value="csp.csproj" />
+        <entry key="Styles/dark.axaml" value="csp.csproj" />
+        <entry key="Styles/light.axaml" value="csp.csproj" />
         <entry key="Views/MainWindow.axaml" value="csp.csproj" />
       </map>
     </option>

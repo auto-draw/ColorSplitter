@@ -26,6 +26,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         
+        Config.init();
+        
         // Taskbar components
         CloseAppButton.Click += (_, _) => Close();
         MinimizeAppButton.Click += (_, _) => WindowState = WindowState.Minimized;

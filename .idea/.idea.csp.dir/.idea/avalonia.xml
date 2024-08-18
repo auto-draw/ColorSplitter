@@ -4,6 +4,9 @@
     <option name="projectPerEditor">
       <map>
         <entry key="App.axaml" value="csp.csproj" />
+        <entry key="Styles/Overrides/Button.axaml" value="csp.csproj" />
+        <entry key="Styles/Overrides/CheckBox.axaml" value="csp.csproj" />
+        <entry key="Styles/Overrides/ComboBox.axaml" value="csp.csproj" />
         <entry key="Styles/dark.axaml" value="csp.csproj" />
         <entry key="Styles/light.axaml" value="csp.csproj" />
         <entry key="Styles/universal.axaml" value="csp.csproj" />

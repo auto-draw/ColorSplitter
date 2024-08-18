@@ -3,23 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="using:csp"
-        x:DataType="global:MainWindowViewModel"
-        
         xmlns:avaloniaControls="clr-namespace:UVtools.AvaloniaControls;assembly=UVtools.AvaloniaControls"
-        xmlns:global="clr-namespace:"
-        xmlns:views="clr-namespace:csp.Views"
 
-        mc:Ignorable="d" d:DesignWidth="588" d:DesignHeight="480"
+        mc:Ignorable="d" d:DesignWidth="588" d:DesignHeight="450"
         x:Name="csp"
         
-        Width="580"
-        Height="450"
+        Width="572"
+        Height="430"
         CanResize="True"
         DragDrop.AllowDrop="False"
 
-        MinWidth="580"
-        MinHeight="450"
+        MinWidth="572"
+        MinHeight="430"
         WindowStartupLocation="CenterScreen"
         
         Title="csp"
@@ -27,26 +22,10 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="20">
-    <Design.DataContext>
-        <global:MainWindowViewModel/>
-    </Design.DataContext>
     
     <Window.Styles>
         <StyleInclude Source="avares://UVtools.AvaloniaControls/Controls.axaml"/>
     </Window.Styles>
-    
-    
-    <Window.DataTemplates>
-        <DataTemplate DataType="{x:Type views:colorButton}">
-            <Button Width="14" Height="14" BorderThickness="0" Margin="2"></Button>
-        </DataTemplate>
-    </Window.DataTemplates>
-    
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <global:MainWindowViewModel/>
-    </Design.DataContext>
 
     <Grid RowDefinitions="20,1*">
         <!--Toolbar-->
@@ -80,8 +59,8 @@
         <Image Classes="MainBodySecond" Grid.Row="1" />
         <Image Classes="MainBodyThird" Grid.Row="1" />
 
-        <Grid Classes="Body" Grid.Row="1" Name="Body" ColumnDefinitions="330*,250*">
-            <Grid Grid.Column="0" RowDefinitions="250*,16,180*" Margin="8">
+        <Grid Classes="Body" Grid.Row="1" Name="Body" ColumnDefinitions="*,250">
+            <Grid Grid.Column="0" RowDefinitions="250,16,*,4" Margin="8">
                 <Canvas Grid.Row="0" Classes="ImagePreview" VerticalAlignment="Stretch">
                     <Canvas.ContextMenu>
                         <ContextMenu>
@@ -99,23 +78,76 @@
                 <Grid Grid.Row="2" ColumnDefinitions="153*,8*,153*">
                     <Grid Grid.Column="0" RowDefinitions="15,20,*">
                         <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Colors:</Label>
-                        <Canvas Grid.Row="1" Grid.RowSpan="2" Background="#3000"></Canvas>
-                        <ScrollViewer Grid.Row="2" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Visible" BorderThickness="2">
-                            <WrapPanel Margin="4" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                <ContentControl Content="{Binding ColorsContent}">
-                                    <ContentControl.ContentTemplate>
-                                        <local:ViewLocator></local:ViewLocator>
-                                    </ContentControl.ContentTemplate>
-                                    
-                                </ContentControl>
-                                
+                        <Border Grid.Row="1" Grid.RowSpan="2" Background="#3000" CornerRadius="4"></Border>
+                        <ScrollViewer Grid.Row="2" Padding="5 0 0 0" VerticalScrollBarVisibility="Visible">
+                            <WrapPanel Name="ColorsList">
+                                <!--We're adding in code, not via DataTemplate and shit, because fuck that, plus doesnt seem to work on WrapPanel at all.-->
                             </WrapPanel>
                         </ScrollViewer>
-                        <TextBox Grid.Row="1" CornerRadius="4" Background="#3000" BorderBrush="#8cffffff" Width="48" Margin="2"></TextBox>
+                        <TextBox Name="ColorsTextBox" Grid.Row="1" CornerRadius="4" Background="#3000" BorderBrush="#8cffffff" Width="48" Margin="2">
+                            256
+                        </TextBox>
                     </Grid>
+                    <StackPanel Grid.Column="2">
+                        <Grid RowDefinitions="15,24" Margin="16 0 16 8">
+                            <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Mode:</Label>
+                            <ComboBox Name="ModeSelector" Grid.Row="1" FontSize="12" CornerRadius="4" Background="#3000" Height="24" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
+                                <ComboBoxItem Content="Crunch Down"/>
+                            </ComboBox>
+                        </Grid>
+                        <Grid RowDefinitions="15,24" Margin="16 0 16 8">
+                            <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Smoothing:</Label>
+                            <TextBox Name="SmoothingTextBox" Grid.Row="1" CornerRadius="4" Background="#3000" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
+                                14
+                            </TextBox>
+                        </Grid>
+                    </StackPanel>
                 </Grid>
             </Grid>
             
+            <Grid Grid.Column="1" RowDefinitions="*,50">
+                <ListBox x:Name="Objects" Grid.Row="0" Margin="8" Background="#59000000" CornerRadius="2">
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0 0 0 4"/>
+                        </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:CompileBindings="False"> 
+                            <!--MVVM is too weird bro.-->
+                            <Panel Height="80" Background="#1fff">
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="115"/>
+                                        <ColumnDefinition Width="4"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Background="#2fff" />
+                                    
+                                    <Grid Grid.Column="2">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="2"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="4"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="4"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Row="0" Padding="0" Content="{Binding Title}" FontWeight="Bold" />
+                                        <Label Grid.Row="2" Padding="0" Content="{Binding Author}"/>
+                                        <TextBlock Grid.Row="4" Text="{Binding Description}" TextWrapping="Wrap"/>
+                                    </Grid>
+                                </Grid>
+                            </Panel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

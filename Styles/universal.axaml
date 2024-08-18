@@ -1,6 +1,11 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     
+    <Style Selector="Button.ColorItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="White"/>
+    </Style>
+    
     <Style Selector="TreeViewItem.Round">
         <Setter Property="CornerRadius" Value="4"/>
     </Style>

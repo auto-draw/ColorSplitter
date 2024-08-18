@@ -46,8 +46,8 @@ public partial class App : Application
                 new Uri(CurrentTheme)
             );
             Current.RequestedThemeVariant = SavedIsDark ? ThemeVariant.Dark : ThemeVariant.Light;
-            if (Current.Styles.Count > 4)
-                Current.Styles.Remove(Current.Styles[4]);
+            if (Current.Styles.Count > 3)
+                Current.Styles.Remove(Current.Styles[3]);
             Current.Styles.Add(Resource);
         }
         catch

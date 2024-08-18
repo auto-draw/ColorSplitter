@@ -1,26 +1,36 @@
 using System;
 using System.IO;
 using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Media.Immutable;
 using Avalonia.Platform.Storage;
+using Avalonia.Styling;
 using SkiaSharp;
 
 namespace csp.Views;
 
 
-public class colorButton
-{
-}
-
 public partial class MainWindow : Window
 {
+    public class listedTheme
+    {
+        public string Title { get; set; }
+        public string Author { get; set; }
+        public string Description { get; set; }
+        public string Image { get; set; }
+        
+        public string ButtonParameter { get; set; }
+    }
+    
     private SKBitmap _rawBitmap = new SKBitmap();
     private Bitmap _previewBitmap;
-    public object ColorsContent => new colorButton() ;
     
     public MainWindow()
     {
@@ -33,12 +43,27 @@ public partial class MainWindow : Window
         MinimizeAppButton.Click += (_, _) => WindowState = WindowState.Minimized;
         
         // Image components
-        
-        var template = new FuncDataTemplate<colorButton>((value, namescope) =>
-            new TextBlock
-            {
-                [!TextBlock.TextProperty] = new Binding("FirstName"),
-            });
+        for (byte i = 0; i < 255; i++)
+        {
+            var newItem = new Button();
+            newItem.Width = 14;
+            newItem.Height = 14;
+            newItem.Margin = new Thickness(2);
+            newItem.BorderThickness = new Thickness(0);
+            var color = new SolidColorBrush((Color)HsvColor.FromHsv(i,255,255));
+            newItem.Background = color;
+            newItem.Classes.Add("noChange");
+            newItem.Classes.Add("ColorItem");
+            ColorsList.Children.Add(newItem);
+        }
+
+        for (byte i = 0; i < 20; i++)
+        {
+            var newListItem = new listedTheme();
+            newListItem.Title = "BOYS!";
+            Objects.Items.Add(newListItem);
+        }
+
     }
 
     public static FilePickerFileType ImageFileFilters { get; } = new("Image files")

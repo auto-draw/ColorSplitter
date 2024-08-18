@@ -13,6 +13,8 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://csp/Styles/Overrides/CheckBox.axaml" />
+                <ResourceInclude Source="avares://csp/Styles/Overrides/ComboBox.axaml" />
+                <ResourceInclude Source="avares://csp/Styles/Overrides/Button.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

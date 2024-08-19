@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -13,10 +15,51 @@ namespace csp;
 
 public static class ImageExtensions
 {
+    public static class ImageHelper
+    {
+        public static Bitmap LoadFromResource(Uri resourceUri)
+        {
+            return new Bitmap(AssetLoader.Open(resourceUri));
+        }
+
+        public static async Task<Bitmap?> LoadFromWeb(Uri url)
+        {
+            using var httpClient = new HttpClient();
+            try
+            {
+                var response = await httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+                var data = await response.Content.ReadAsByteArrayAsync();
+                return new Bitmap(new MemoryStream(data));
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"An error occurred while downloading image '{url}' : {ex.Message}");
+                return null;
+            }
+        }
+    }
+    
     public static Bitmap ConvertToAvaloniaBitmap(this SKBitmap bitmap)
     {
-        //terrible
-        return new Bitmap(bitmap.Encode(SKEncodedImageFormat.Png, 100).AsStream());
+        using var bm = bitmap.PeekPixels();
+        using var img = SKImage.FromPixels(bm);
+        using var enc = img.Encode();
+        using var stream = enc.AsStream();
+        return new Bitmap(stream);
+    }
+    
+    public static SKBitmap ConvertToSKBitmap(this Bitmap bitmap)
+    {
+        using (var memoryStream = new MemoryStream())
+        {
+            // Save Avalonia Bitmap to MemoryStream
+            bitmap.Save(memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+
+            // Load MemoryStream into SKBitmap
+            return SKBitmap.Decode(memoryStream);
+        }
     }
 
     public static unsafe SKBitmap NormalizeColor(this SKBitmap SourceBitmap)
@@ -36,6 +79,8 @@ public static class ImageExtensions
         var height = OutputBitmap.Height;
 
         var outColor = OutputBitmap.ColorType;
+        
+        Console.WriteLine(srcColor);
 
         for (var row = 0; row < height; row++)
         for (var col = 0; col < width; col++)
@@ -67,7 +112,7 @@ public static class ImageExtensions
                 *dstPtr++ = (byte)(b * 2);
                 *dstPtr++ = (byte)(g * 2);
                 *dstPtr++ = (byte)(r * 2);
-                *dstPtr++ = (byte)(a * 2);
+                *dstPtr++ = a;
             }
 
         SourceBitmap.Dispose();

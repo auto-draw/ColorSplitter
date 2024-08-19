@@ -118,7 +118,7 @@ public partial class App : Application
     {
         // I tried to do this before it was initialised, but "Replace" would prevent the "GetEntry" from ever being
         // - null, which means it would never "default" to dark theme if there is no entry. 
-        if (themeUri.Contains("avares://Autodraw")) themeUri = themeUri.Replace("avares://Autodraw", "avares://csp");
+        if (themeUri.Contains("avares://Autodraw")) themeUri = themeUri.Replace("avares://Autodraw", "avares://Color-Splitter");
         // Behold, terrible bruteforce-ey code! Performance be damned!
         try
         {

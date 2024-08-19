@@ -5,16 +5,16 @@
 
     <Application.Styles>
         <FluentTheme />
-        <StyleInclude Source="avares://csp/Styles/universal.axaml" />
-        <StyleInclude Source="avares://csp/Styles/dark.axaml" />
+        <StyleInclude Source="avares://Color-Splitter/Styles/universal.axaml" />
+        <StyleInclude Source="avares://Color-Splitter/Styles/dark.axaml" />
     </Application.Styles>
 
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="avares://csp/Styles/Overrides/CheckBox.axaml" />
-                <ResourceInclude Source="avares://csp/Styles/Overrides/ComboBox.axaml" />
-                <ResourceInclude Source="avares://csp/Styles/Overrides/Button.axaml" />
+                <ResourceInclude Source="avares://Color-Splitter/Styles/Overrides/CheckBox.axaml" />
+                <ResourceInclude Source="avares://Color-Splitter/Styles/Overrides/ComboBox.axaml" />
+                <ResourceInclude Source="avares://Color-Splitter/Styles/Overrides/Button.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

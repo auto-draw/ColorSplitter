@@ -69,6 +69,6 @@
     </Style>
 
     <Style Selector="Image.CloseApp">
-        <Setter Property="Source" Value="avares://csp/Assets/Light/close.png" />
+        <Setter Property="Source" Value="avares://Color-Splitter/Assets/Light/close.png" />
     </Style>
 </Styles>

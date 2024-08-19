@@ -61,7 +61,7 @@
         <Image Classes="MainBodyThird" Grid.Row="1" />
 
         <Grid Classes="Body" Grid.Row="1" Name="Body" ColumnDefinitions="*,250">
-            <Grid Grid.Column="0" RowDefinitions="250,16,*,4" Margin="8">
+            <Grid Grid.Column="0" RowDefinitions="*,16,Auto,4" Margin="8">
                 <Canvas Grid.Row="0" Classes="ImagePreview" VerticalAlignment="Stretch">
                     <Canvas.ContextMenu>
                         <ContextMenu>
@@ -76,7 +76,7 @@
                         Width="{Binding $parent.Bounds.Width}" Height="{Binding $parent.Bounds.Height}">
                     </avaloniaControls:AdvancedImageBox>
                 </Canvas>
-                <Grid Grid.Row="2" ColumnDefinitions="153*,8*,153*">
+                <Grid Grid.Row="2" ColumnDefinitions="*,8,Auto">
                     <Grid Grid.Column="0" RowDefinitions="15,20,*">
                         <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Colors:</Label>
                         <Border Grid.Row="1" Grid.RowSpan="2" Background="#3000" CornerRadius="4"></Border>
@@ -89,7 +89,7 @@
                             12
                         </TextBox>
                     </Grid>
-                    <StackPanel Grid.Column="2">
+                    <StackPanel Grid.Column="2" MinWidth="153">
                         <Grid RowDefinitions="15,24" Margin="16 0 16 8">
                             <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Mode:</Label>
                             <ComboBox SelectedIndex="0" Name="ModeSelector" Grid.Row="1" FontSize="12" CornerRadius="4" Background="#3000" Height="24" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">

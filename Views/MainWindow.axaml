@@ -25,6 +25,7 @@
     
     <Window.Styles>
         <StyleInclude Source="avares://UVtools.AvaloniaControls/Controls.axaml"/>
+        <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
     </Window.Styles>
 
     <Grid RowDefinitions="20,1*">
@@ -162,6 +163,11 @@
                     </Panel>
                 </Grid>
             </Grid>
+        </Grid>
+        <Grid Name="ColorPalette" Grid.Row="1" RowDefinitions="*,48" Margin="80 20" IsVisible="False">
+            <Border Grid.RowSpan="2" CornerRadius="8"  Background="#232323" ></Border>
+            <ColorView Margin="8" IsAlphaEnabled="false" IsAlphaVisible="false" IsColorPreviewVisible="False" />
+            <Button Name="CloseColorPalette" CornerRadius="4" BorderThickness="0" Classes="accent" Grid.Row="1" Height="30" Margin="0 0 0 8" HorizontalAlignment="Center" VerticalContentAlignment="Center">Close</Button>
         </Grid>
     </Grid>
 </Window>

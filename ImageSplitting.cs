@@ -18,11 +18,8 @@ public class ImageSplitting
 
     public static (SKBitmap,Dictionary<Color, int>) colorQuantize(SKBitmap bitmap)
     {
-        Console.WriteLine(bitmap);
         var enc = bitmap.Encode(SKEncodedImageFormat.Png, 100);
-        Console.WriteLine(enc);
         var stream = enc.AsStream();
-        Console.WriteLine(stream);
         mImage = new MagickImage(stream);
 
         mImage.Quantize(new QuantizeSettings()

@@ -12,7 +12,7 @@ namespace csp;
 
 public partial class App : Application
 {
-    public static string CurrentTheme = Config.GetEntry("theme") ?? "avares://csp/Styles/light.axaml";
+    public static string CurrentTheme = Config.GetEntry("theme") ?? "avares://Color-Splitter/Styles/light.axaml";
     
     public static bool SavedIsDark =
         Config.GetEntry("isDarkTheme") == null || bool.Parse(Config.GetEntry("isDarkTheme") ?? "true");
@@ -54,13 +54,13 @@ public partial class App : Application
         {
             // Tries loading our default theme. Purpose of this is if a theme somehow vanished.
             var Resource = (IStyle)AvaloniaXamlLoader.Load(
-                new Uri("avares://csp/Styles/dark.axaml")
+                new Uri("avares://Color-Splitter/Styles/dark.axaml")
             );
             Current.RequestedThemeVariant = ThemeVariant.Dark;
-            if (Current.Styles.Count > 4)
-                Current.Styles.Remove(Current.Styles[4]);
+            if (Current.Styles.Count > 3)
+                Current.Styles.Remove(Current.Styles[3]);
             Current.Styles.Add(Resource);
-            CurrentTheme = "avares://csp/Styles/dark.axaml";
+            CurrentTheme = "avares://Color-Splitter/Styles/dark.axaml";
             SavedIsDark = true;
         }
     }
@@ -82,20 +82,18 @@ public partial class App : Application
             {
                 OutputMessage += "- You have not saved this theme, so it won't parse style:./.\n\n";
             }
+            
             Match isCodeDark = Regex.Match(TextInput, @"<!--#DarkTheme-->");
             Match isCodeLight = Regex.Match(TextInput, @"<!--#LightTheme-->");
             if (isCodeDark.Success && isCodeLight.Success) throw new Exception("My brother in christ, you cannot have both DarkTheme and LightTheme.");
             if (isCodeDark.Success) isDark = true;
             if (isCodeLight.Success) isDark = false;
-
-            /*var Resource = AvaloniaRuntimeXamlLoader.Parse<Styles>(
-                TextInput
-            );*/
+            
             var Resource = AvaloniaRuntimeXamlLoader.Parse<Styles>(
                 TextInput
             );
             Current.RequestedThemeVariant = isDark ? ThemeVariant.Dark : ThemeVariant.Light;
-            Current.Styles.Remove(Current.Styles[4]);
+            Current.Styles.Remove(Current.Styles[3]);
             Current.Styles.Add(Resource);
             if (themeUri != "")
             {
@@ -106,6 +104,7 @@ public partial class App : Application
         catch (Exception ex)
         {
             ThemeFailed();
+            Console.WriteLine(ex);
             OutputMessage += "# Theme has failed to load successfully due to an error.\n" + ex.Message;
             return OutputMessage;
         }
@@ -128,7 +127,7 @@ public partial class App : Application
                 new Uri(themeUri)
             );
             Current.RequestedThemeVariant = isDark ? ThemeVariant.Dark : ThemeVariant.Light;
-            //Current.Styles.Remove(Current.Styles[4]);
+            //Current.Styles.Remove(Current.Styles[3]);
             Current.Styles.Add(Resource);
             CurrentTheme = themeUri;
             SavedIsDark = isDark;

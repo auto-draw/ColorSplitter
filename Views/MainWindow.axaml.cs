@@ -58,7 +58,11 @@ public partial class MainWindow : Window
         
         // Taskbar components
         CloseAppButton.Click += (_, _) => Close();
-        MinimizeAppButton.Click += (_, _) => WindowState = WindowState.Minimized;
+        MinimizeAppButton.Click += (_, _) =>
+        {
+            throw new Exception("Ohh yeah!");
+
+        };
 
     }
 

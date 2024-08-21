@@ -79,7 +79,7 @@ public partial class MainWindow : Window
 
     // Taskbar components
         CloseAppButton.Click += (_, _) => Close();
-        MinimizeAppButton.Click += (_, _) => Hide();
+        MinimizeAppButton.Click += (_, _) => WindowState = WindowState.Minimized;
 
     }
 

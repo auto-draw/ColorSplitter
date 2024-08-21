@@ -39,30 +39,47 @@ public partial class MainWindow : Window
     private static SKBitmap _rawBitmap = ImageExtensions.ImageHelper.LoadFromResource(new Uri("avares://Color-Splitter/Assets/Example.png")).ConvertToSKBitmap();
     private SKBitmap _editedBitmap = _rawBitmap;
     private Bitmap _previewBitmap;
-    
-    
+
+    private object? ColorViewUser;
+    private EventHandler<ColorChangedEventArgs>? ColorViewBinding;
+    private EventHandler<RoutedEventArgs>? ColorViewCloseBinding;
+
+
     public MainWindow()
     {
         InitializeComponent();
-        
+
         Config.init();
 
         ImageSplitting.backgroundColor = new Color(255, 0, 0, 0);
         AlphaColor.Background = new SolidColorBrush(ImageSplitting.backgroundColor);
-        
+
         // Image Handling
         ImportButton.Click += ImageButton;
         ExportButton.Click += ImageExportFolder;
         ColorsTextBox.TextChanged += ColorsTextBoxOnTextChanged;
         SmoothingTextBox.TextChanged += SmoothingTextBoxOnTextChanged;
-        
-        // Taskbar components
-        CloseAppButton.Click += (_, _) => Close();
-        MinimizeAppButton.Click += (_, _) =>
+        AlphaColor.Click += (sender, args) =>
         {
-            throw new Exception("Ohh yeah!");
-
+            Console.Write(sender);
+            EnableColorView(sender!, 
+                (o, eventArgs) =>
+                {
+                    AlphaColor.Background = new SolidColorBrush(eventArgs.NewColor);
+                    ImageSplitting.backgroundColor = eventArgs.NewColor;
+                },
+                (o, eventArgs) =>
+                {
+                    updateQuantize();
+                });
         };
+        
+        // Color View Config
+        ColorView.Palette = new SixteenColorPalette();
+
+    // Taskbar components
+        CloseAppButton.Click += (_, _) => Close();
+        MinimizeAppButton.Click += (_, _) => Hide();
 
     }
 
@@ -247,6 +264,37 @@ public partial class MainWindow : Window
                 newListItem.ButtonIcon = ImageExtensions.ImageHelper.LoadFromResource(new Uri("avares://Color-Splitter/Assets/Dark/eye-solid.png"));
             }
             Objects.Items.Add(newListItem);
+        }
+    }
+    
+    private void EnableColorView(object sender, EventHandler<ColorChangedEventArgs> requestBinding, EventHandler<RoutedEventArgs>? closeBinding)
+    {
+        if (ColorViewUser is not null)
+        {
+            return;
+        }
+        ColorPalette.IsVisible = true;
+
+        ColorViewUser = sender;
+        ColorViewBinding = requestBinding;
+        ColorView.ColorChanged += ColorViewBinding;
+        CloseColorView.Click += CloseColorViewOnClick;
+
+        if (closeBinding is not null)
+        {
+            ColorViewCloseBinding = closeBinding;
+        }
+    }
+
+    private void CloseColorViewOnClick(object? sender, RoutedEventArgs e)
+    {
+        ColorViewUser = null;
+        ColorPalette.IsVisible = false;
+        ColorView.ColorChanged -= ColorViewBinding;
+        CloseColorView.Click -= CloseColorViewOnClick;
+        if (ColorViewCloseBinding is not null)
+        {
+            ColorViewCloseBinding.Invoke(sender,e);
         }
     }
 

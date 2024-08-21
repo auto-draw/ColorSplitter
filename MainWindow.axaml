@@ -96,7 +96,7 @@
                                 <ComboBoxItem Content="Adaptive"/>
                             </ComboBox>
                         </Grid>
-                        <Grid RowDefinitions="15,24" Margin="16 0 16 8">
+                        <Grid IsVisible="False" RowDefinitions="15,24" Margin="16 0 16 8">
                             <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Smoothing:</Label>
                             <TextBox IsEnabled="False" Name="SmoothingTextBox" Grid.Row="1" CornerRadius="4" Background="#3000" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
                                 1
@@ -141,7 +141,7 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <Label Grid.Column="0" Padding="0 2" FontSize="12" Content="{Binding Title}" FontWeight="Bold" />
-                                        <Button Grid.Column="2" Click="ShowHideIcon" CommandParameter="{Binding HideShow}" VerticalAlignment="Top" Margin="0" Padding="2" BorderThickness="0" CornerRadius="2">
+                                        <Button IsVisible="False" Grid.Column="2" Click="ShowHideIcon" CommandParameter="{Binding HideShow}" VerticalAlignment="Top" Margin="0" Padding="2" BorderThickness="0" CornerRadius="2">
                                             <Image Source="{Binding ButtonIcon}" Height="16" Width="16"/>
                                         </Button>
                                     </Grid>
@@ -166,8 +166,8 @@
         </Grid>
         <Grid Name="ColorPalette" Grid.Row="1" RowDefinitions="*,48" Margin="80 20" IsVisible="False">
             <Border Grid.RowSpan="2" CornerRadius="8"  Background="#232323" ></Border>
-            <ColorView Margin="8" IsAlphaEnabled="false" IsAlphaVisible="false" IsColorPreviewVisible="False" />
-            <Button Name="CloseColorPalette" CornerRadius="4" BorderThickness="0" Classes="accent" Grid.Row="1" Height="30" Margin="0 0 0 8" HorizontalAlignment="Center" VerticalContentAlignment="Center">Close</Button>
+            <ColorView Name="ColorView" Margin="8" IsAlphaVisible="false" IsColorPreviewVisible="True" IsAccentColorsVisible="False" />
+            <Button Name="CloseColorView" CornerRadius="4" BorderThickness="0" Classes="accent" Grid.Row="1" Height="30" Margin="0 0 0 8" HorizontalAlignment="Center" VerticalContentAlignment="Center">Close</Button>
         </Grid>
     </Grid>
 </Window>

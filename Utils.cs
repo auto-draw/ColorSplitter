@@ -39,6 +39,11 @@ public static class ImageExtensions
             }
         }
     }
+
+    public static int bwRGB(byte r, byte b, byte g)
+    {
+        return (r << 16) | (g << 8) | b;
+    }
     
     public static Bitmap ConvertToAvaloniaBitmap(this SKBitmap bitmap)
     {

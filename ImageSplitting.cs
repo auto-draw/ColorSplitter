@@ -23,7 +23,7 @@ public class ImageSplitting
         mImage = new MagickImage(stream);
 
         mImage.Quantize(new QuantizeSettings()
-            { Colors = Colors, DitherMethod = DitherMethod.No });
+            { Colors = Colors, DitherMethod = DitherMethod.No, TreeDepth = 8});
         mImage.BackgroundColor = new MagickColor(backgroundColor.R,backgroundColor.G,backgroundColor.B);
         mImage.Alpha(AlphaOption.Remove);
 

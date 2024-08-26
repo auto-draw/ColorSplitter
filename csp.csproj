@@ -23,6 +23,7 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
+        <AvaloniaResource Remove="Builds\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -56,5 +57,22 @@
         <DependentUpon>MainWindow.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Remove="Builds\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AvaloniaXaml Remove="Builds\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Builds\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Remove="Builds\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Builds\**" />
     </ItemGroup>
 </Project>

@@ -6,14 +6,6 @@ This software takes an input image, quantizes it down to best fit, and then sepe
 The use case of this application primarily focuses on AutoDraw, and other similar applications.
 This application can also be used in other fields of use, such as color analysis, palette extraction, and general use in image processing amonst other tools.
 
-## TODO:
-We plan on switching out the Algorithm to includem multiple algorithms for Quantization, to provide a more visually accurate and more capable set of algorithms for greater potential.
-Current algorithms to be added:
-  Wu's Algorithm - Exceptional Visual Accuracy, mediocore performance
-  Spatial Color - Beyond Exceptional < 16 Color Accuracy, however atrocious performance
-In addition, we may add:
-  NeuQuant Neural Network - Beyond Exceptional Color Accuracy - good performance, however pain to implement.
-
 ## Installation
 To install and run Color Splitter, you can find a downloadable binary on the right on Releases.
 
@@ -24,8 +16,11 @@ You can either build via your choice of an IDE (Suggested JetBrains Rider or Vis
 **Usage of Release Build Script.**
 
 ### Prequisites:
+
 [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+
 Any bash supporting terminal (Any Linux Terminal, Powershell, Git Bash, etc)
+
 
 **Clone the repository:**
 ```bash

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using Avalonia.Media;
 using ColorSplitter.Algorithms;
 using SkiaSharp;
@@ -13,6 +14,7 @@ public class ImageSplitting
     public static Color backgroundColor = default; // The Alpha Background Color
     private static Dictionary<Color, int> colorDictionary = new(); // The Color Directory, listing all colors.
     private static SKBitmap quantizedBitmap = new();
+    public static bool RemoveStrayPixels = false; // Flag to enable/disable stray pixel removal
 
     public enum Algorithm
     {
@@ -32,9 +34,141 @@ public class ImageSplitting
                 break;
         }
         
+        // Apply stray pixel removal if enabled
+        if (RemoveStrayPixels)
+        {
+            quantizedBitmap = removeStrayPixels(quantizedBitmap);
+        }
         
         // Don't even bother asking what int in colorDictionary was used for before, my guess is it was the total amount of that color?? :shrug:
         return (quantizedBitmap, colorDictionary);
+    }
+
+    // Removes stray pixels by replacing them with the most common neighboring color
+    public static unsafe SKBitmap removeStrayPixels(SKBitmap bitmap)
+    {
+        // Create a copy of the bitmap to work with
+        SKBitmap outputBitmap = bitmap.Copy();
+        
+        // Get dimensions
+        int width = bitmap.Width;
+        int height = bitmap.Height;
+        
+        // Skip processing if the image is too small
+        if (width <= 2 || height <= 2)
+            return outputBitmap;
+            
+        // Get pointers to pixel data
+        var srcPtr = (byte*)bitmap.GetPixels().ToPointer();
+        var dstPtr = (byte*)outputBitmap.GetPixels().ToPointer();
+        
+        // Create a temporary array to store the original image data
+        byte[] imageData = new byte[width * height * 4];
+        System.Runtime.InteropServices.Marshal.Copy(bitmap.GetPixels(), imageData, 0, imageData.Length);
+        
+        // Define adjacent directions (up, right, down, left)
+        int[] dx = { 0, 1, 0, -1 };
+        int[] dy = { -1, 0, 1, 0 };
+        
+        // Process each pixel (excluding the border pixels)
+        for (int y = 1; y < height - 1; y++)
+        {
+            for (int x = 1; x < width - 1; x++)
+            {
+                // Calculate pixel index
+                int pixelIndex = (y * width + x) * 4;
+                
+                // Get current pixel color
+                byte b = imageData[pixelIndex];
+                byte g = imageData[pixelIndex + 1];
+                byte r = imageData[pixelIndex + 2];
+                byte a = imageData[pixelIndex + 3];
+                
+                // Skip transparent pixels
+                if (a == 0)
+                    continue;
+                
+                // Check if pixel is isolated (no adjacent pixels of same color)
+                bool isStrayPixel = true;
+                
+                // Check the 4 adjacent neighbors
+                for (int i = 0; i < 4 && isStrayPixel; i++)
+                {
+                    // Calculate neighbor position
+                    int nx = x + dx[i];
+                    int ny = y + dy[i];
+                    
+                    // Calculate neighbor index
+                    int neighborIndex = (ny * width + nx) * 4;
+                    
+                    // If any adjacent neighbor has the same color, it's not isolated
+                    if (imageData[neighborIndex] == b && 
+                        imageData[neighborIndex + 1] == g && 
+                        imageData[neighborIndex + 2] == r)
+                    {
+                        isStrayPixel = false;
+                    }
+                }
+                
+                // Replace isolated pixels with most common adjacent color
+                if (isStrayPixel)
+                {
+                    // Count occurrences of each adjacent color
+                    Dictionary<(byte, byte, byte), int> colorCount = new Dictionary<(byte, byte, byte), int>();
+                    
+                    // Loop through the 4 adjacent neighbors
+                    for (int i = 0; i < 4; i++)
+                    {
+                        // Calculate neighbor position
+                        int nx = x + dx[i];
+                        int ny = y + dy[i];
+                        
+                        // Calculate neighbor index
+                        int neighborIndex = (ny * width + nx) * 4;
+                        
+                        // Skip transparent neighbors
+                        if (imageData[neighborIndex + 3] == 0)
+                            continue;
+                            
+                        // Fetch neighbor color
+                        byte nb = imageData[neighborIndex];
+                        byte ng = imageData[neighborIndex + 1];
+                        byte nr = imageData[neighborIndex + 2];
+                        
+                        // Add to color count
+                        var colorKey = (nr, ng, nb);
+                        if (colorCount.ContainsKey(colorKey))
+                            colorCount[colorKey]++;
+                        else
+                            colorCount[colorKey] = 1;
+                    }
+                    
+                    // Find the most common color
+                    (byte, byte, byte) mostCommonColor = (0, 0, 0);
+                    int maxCount = 0;
+                    
+                    foreach (var colorEntry in colorCount)
+                    {
+                        if (colorEntry.Value > maxCount)
+                        {
+                            maxCount = colorEntry.Value;
+                            mostCommonColor = colorEntry.Key;
+                        }
+                    }
+                    
+                    // Replace the stray pixel with the most common neighboring color
+                    int currentDstIndex = (y * width + x) * 4;
+                    dstPtr[currentDstIndex] = mostCommonColor.Item3;     // B
+                    dstPtr[currentDstIndex + 1] = mostCommonColor.Item2; // G
+                    dstPtr[currentDstIndex + 2] = mostCommonColor.Item1; // R
+                    // Keep the original alpha value
+                    dstPtr[currentDstIndex + 3] = a;
+                }
+            }
+        }
+        
+        // Return the Output Bitmap
+        return outputBitmap;
     }
 
     // Gets the Layers from the latest MagickImage

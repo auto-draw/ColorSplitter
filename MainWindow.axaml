@@ -108,6 +108,9 @@
                             <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Alpha Color:</Label>
                             <Button Grid.Row="1" Name="AlphaColor" Classes="noChange" Cursor="Hand" Height="24" Width="{Binding $parent.Bounds.Width}" BorderThickness="1" Background="#3000" BorderBrush="#8cffffff" CornerRadius="4"></Button>
                         </Grid>
+                        <Grid RowDefinitions="24" Margin="4 0 4 8">
+                            <CheckBox Grid.Row="0" Name="RemoveStrayPixelsCheckBox" Content="Remove Stray Pixels" Foreground="White" Checked="RemoveStrayPixelsCheckBox_OnChecked" Unchecked="RemoveStrayPixelsCheckBox_OnUnchecked"/>
+                        </Grid>
                     </StackPanel>
                 </Grid>
             </Grid>

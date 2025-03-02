@@ -11,7 +11,7 @@ using Newtonsoft.Json.Linq;
 using SkiaSharp;
 using Formatting = Newtonsoft.Json.Formatting;
 
-namespace csp;
+namespace ColorSplitter;
 
 public static class ImageExtensions
 {

@@ -19,9 +19,10 @@ using Avalonia.Platform.Storage;
 using Avalonia.Skia;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using ColorSplitter;
 using SkiaSharp;
 
-namespace csp.Views;
+namespace ColorSplitter.Views;
 
 
 public partial class MainWindow : Window
@@ -154,9 +155,6 @@ public partial class MainWindow : Window
             SmoothingTextBox.Text = "1";
             return;
         }
-
-        // Set the ImageSplitter Colors to the input number
-        ImageSplitting.Smoothing = (byte)_Number;
     }
 
     public static FilePickerFileType ImageFileFilters { get; } = new("Image files")

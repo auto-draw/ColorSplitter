@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "csp", "csp.csproj", "{70042A9E-E834-42D3-B6C4-8949DD53C88B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColorSplitter", "ColorSplitter.csproj", "{70042A9E-E834-42D3-B6C4-8949DD53C88B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

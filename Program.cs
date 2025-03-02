@@ -2,7 +2,7 @@
 using Avalonia.ReactiveUI;
 using System;
 
-namespace csp;
+namespace ColorSplitter;
 
 sealed class Program
 {

@@ -67,9 +67,9 @@
                         <ContextMenu>
                             <!--
                             <MenuItem Name="ImageAIGeneration" Header="AI Generation"/>
-                            <MenuItem Name="ImageSaveImage" Header="Save Image"/>
                             <MenuItem Name="ImageClearImage" Header="Clear Image"/>
                             -->
+                            <MenuItem Name="ImageSaveImage" Header="Save Image"/>
                         </ContextMenu>
                     </Canvas.ContextMenu>
                     <avaloniaControls:AdvancedImageBox Name="ImagePreview" ShowGrid="False"
@@ -90,19 +90,21 @@
                         </TextBox>
                     </Grid>
                     <StackPanel Grid.Column="2" MinWidth="153">
-                        <Grid RowDefinitions="15,24" Margin="16 0 16 8">
+                        <Grid RowDefinitions="15,24" Margin="4 0 4 8">
                             <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Mode:</Label>
-                            <ComboBox SelectedIndex="0" Name="ModeSelector" Grid.Row="1" FontSize="12" CornerRadius="4" Background="#3000" Height="24" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
-                                <ComboBoxItem Content="Adaptive"/>
+                            <ComboBox SelectedIndex="0" SelectionChanged="ModeSelector_OnSelectionChanged" Name="ModeSelector" Grid.Row="1" FontSize="11" CornerRadius="4" Background="#3000" Height="24" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
+                                <ComboBoxItem Content="KMeans OKLab"/>
+                                <ComboBoxItem Content="KMeans CIELab"/>
+                                <ComboBoxItem Content="KMeans RGB"/>
                             </ComboBox>
                         </Grid>
-                        <Grid IsVisible="False" RowDefinitions="15,24" Margin="16 0 16 8">
-                            <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Smoothing:</Label>
-                            <TextBox IsEnabled="False" Name="SmoothingTextBox" Grid.Row="1" CornerRadius="4" Background="#3000" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
-                                1
+                        <Grid IsVisible="True" RowDefinitions="15,24" Margin="4 0 4 8">
+                            <Label Name="ArgumentName" Grid.Row="0" HorizontalContentAlignment="Center" Padding="0" Content="Iterations"></Label>
+                            <TextBox IsEnabled="True" Name="ArgumentTextbox" Grid.Row="1" CornerRadius="4" Background="#3000" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
+                                12
                             </TextBox>
                         </Grid>
-                        <Grid RowDefinitions="15,24" Margin="16 0 16 8">
+                        <Grid RowDefinitions="15,24" Margin="4 0 4 8">
                             <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Alpha Color:</Label>
                             <Button Grid.Row="1" Name="AlphaColor" Classes="noChange" Cursor="Hand" Height="24" Width="{Binding $parent.Bounds.Width}" BorderThickness="1" Background="#3000" BorderBrush="#8cffffff" CornerRadius="4"></Button>
                         </Grid>

@@ -20,6 +20,7 @@ using Avalonia.Skia;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using ColorSplitter;
+using ColorSplitter.Algorithms;
 using SkiaSharp;
 
 namespace ColorSplitter.Views;
@@ -40,6 +41,9 @@ public partial class MainWindow : Window
     private static SKBitmap _rawBitmap = ImageExtensions.ImageHelper.LoadFromResource(new Uri("avares://Color-Splitter/Assets/Example.png")).ConvertToSKBitmap();
     private SKBitmap _editedBitmap = _rawBitmap;
     private Bitmap _previewBitmap;
+    
+    public string argumentName = "Iterations";
+    public bool argumentVisible = true;
 
     private object? ColorViewUser;
     private EventHandler<ColorChangedEventArgs>? ColorViewBinding;
@@ -59,7 +63,7 @@ public partial class MainWindow : Window
         ImportButton.Click += ImageButton;
         ExportButton.Click += ImageExportFolder;
         ColorsTextBox.TextChanged += ColorsTextBoxOnTextChanged;
-        SmoothingTextBox.TextChanged += SmoothingTextBoxOnTextChanged;
+        ImageSaveImage.Click += ImageSaveImageOnClick;
         AlphaColor.Click += (sender, args) =>
         {
             // On Alpha Color View Click, show Color View, with binding to change color, and update Quantization on completion.
@@ -116,7 +120,7 @@ public partial class MainWindow : Window
 
         // Spawn Debounce Thread
         // If 0.3s elapsed since change, and no more changes occured, update image.
-        Thread thread = new Thread(new ThreadStart(() =>
+        Thread thread = new Thread(() =>
         {
             Random random = new Random();
             int _ourKey = random.Next();
@@ -126,35 +130,8 @@ public partial class MainWindow : Window
             {
                 Dispatcher.UIThread.Invoke(updateQuantize);
             }
-        }));
+        });
         thread.Start();
-    }
-
-    private void SmoothingTextBoxOnTextChanged(object? sender, TextChangedEventArgs e)
-    {
-        // Fetch Number from SmoothingTextBox Text Input, and convert to a number, if cannot, return null.
-        var _Number = int.TryParse(SmoothingTextBox.Text, out var colors) ? colors : (int?)null;
-        
-        // If null, default to "1", will loop back to re-run ColorsTextBoxOnTextChanged with a correct input.
-        if (_Number is null)
-        {
-            SmoothingTextBox.Text = "1";
-            return;
-        }
-        
-        // If over "255", default to "255", will loop back to re-run ColorsTextBoxOnTextChanged with a correct input.
-        if (_Number > 255)
-        {
-            SmoothingTextBox.Text = "255";
-            return;
-        }
-        
-        // If number is under "1", default to "1", will loop back to re-run ColorsTextBoxOnTextChanged with a correct input.
-        if (_Number < 1)
-        {
-            SmoothingTextBox.Text = "1";
-            return;
-        }
     }
 
     public static FilePickerFileType ImageFileFilters { get; } = new("Image files")
@@ -163,31 +140,6 @@ public partial class MainWindow : Window
         AppleUniformTypeIdentifiers = new[] { "public.image" },
         MimeTypes = new[] { "image/*" }
     };
-
-    public static FilePickerFileType ZipFileFilters { get; } = new("Zip file")
-    {
-        Patterns = new[] { "*.zip" },
-        MimeTypes = new[] { "application/zip" }
-    };
-
-    /* Depreciated until further notice.
-    private async void ImageExportZIP(object? sender, RoutedEventArgs e)
-    {
-        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
-        {
-            Title = "Export image as a ZIP file",
-            FileTypeChoices = new[] { ZipFileFilters }
-        });
-
-        if (file is null) return;
-        
-        // currently writes "Text file", the zip file will literally just be a text file that you can open in Notepad
-        
-        await using var stream = await file.OpenWriteAsync();
-        using var streamWriter = new StreamWriter(stream);
-        await streamWriter.WriteLineAsync("Text file");
-    }
-    */
     
     // Export all Layers to HexColor
     private async void ImageExportFolder(object? sender, RoutedEventArgs e)
@@ -248,13 +200,61 @@ public partial class MainWindow : Window
         // Update Quantized view.
         updateQuantize();
     }
+    
+    public static FilePickerFileType PngFileFilter { get; } = new("Portable Network Graphics")
+    {
+        Patterns = new[] { "*.png" }
+    };
+
+    private async void ImageSaveImageOnClick(object? sender, RoutedEventArgs e)
+    {
+        if (_editedBitmap is null) return;
+        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "Save Processed Image",
+            FileTypeChoices = new[] { PngFileFilter }
+        });
+
+        if (file is not null)
+        {
+            var encodedData = _editedBitmap.Encode(SKEncodedImageFormat.Png, 100);
+            await using var stream = await file.OpenWriteAsync();
+
+            encodedData.SaveTo(stream);
+        }
+    }
 
     private void updateQuantize()
     {
         // If no bitmap available, return.
         if (_rawBitmap is null) return;
         // Get Image post Quantize, alongside Colors Dictionary.
-        (SKBitmap bmp, Dictionary<Color, int> colors) = ImageSplitting.colorQuantize(_rawBitmap);
+        SKBitmap bmp = new();
+        Dictionary<Color, int> colors = new();
+        
+        
+        int argNumber = 12;
+        if (!string.IsNullOrWhiteSpace(ArgumentTextbox.Text))
+        {
+            string filteredInput = new string(ArgumentTextbox.Text.Where(char.IsDigit).ToArray());
+            _ = int.TryParse(filteredInput, out argNumber);
+        }
+        
+        switch(ModeSelector.SelectedIndex)
+        {
+            case 0: // OKLAB KM
+                LabHelper.colorSpace = LabHelper.ColorSpace.OKLAB;
+                (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.KMeans, argNumber);
+                break;
+            case 1: // CIELAB KM
+                LabHelper.colorSpace = LabHelper.ColorSpace.CIELAB;
+                (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.KMeans, argNumber);
+                break;
+            case 2: // RGB KM
+                (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.KMeans, argNumber, false);
+                break;
+        }
+        
         // Store new variable for quantized image, also stops GarbageCollection.
         _editedBitmap = bmp;
         
@@ -351,5 +351,11 @@ public partial class MainWindow : Window
         // Icon handling, TBA.
         string location = (string)((Button)sender).CommandParameter;
         Console.WriteLine("Number "+location+" is feeling shy/unshy.");
+    }
+
+    private void ModeSelector_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (ModeSelector is null) return; // Uninitialized
+        updateQuantize();
     }
 }

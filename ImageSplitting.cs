@@ -2,55 +2,39 @@
 using System.Collections.Generic;
 using System.IO;
 using Avalonia.Media;
-using ImageMagick;
+using ColorSplitter.Algorithms;
 using SkiaSharp;
 
-namespace csp;
+namespace ColorSplitter;
 
 public class ImageSplitting
 {
     public static byte Colors = 12; // The total amount of colors to split to.
-    //TODO: Smoothing
-    public static byte Smoothing = 0; // Smoothing to be applied
     public static Color backgroundColor = default; // The Alpha Background Color
     private static Dictionary<Color, int> colorDictionary = new(); // The Color Directory, listing all colors.
+    private static SKBitmap quantizedBitmap = new();
 
-    public static MagickImage? mImage; // Magick Image, for ImageMagick Library.
+    public enum Algorithm
+    {
+        KMeans
+    }
 
     // Handles Quantization of an Image
-    public static (SKBitmap,Dictionary<Color, int>) colorQuantize(SKBitmap bitmap)
+    public static (SKBitmap,Dictionary<Color, int>) colorQuantize(SKBitmap bitmap, Algorithm algorithm = Algorithm.KMeans, object? argument = null, bool lab = true)
     {
-        // Encode into ImageMagick Image
-        var enc = bitmap.Encode(SKEncodedImageFormat.Png, 100);
-        var stream = enc.AsStream();
-        mImage = new MagickImage(stream);
-        
-        // Generate Quantization Image, with Background Color applied to transparent background.
-        mImage.BackgroundColor = new MagickColor(backgroundColor.R,backgroundColor.G,backgroundColor.B);
-        mImage.Quantize(new QuantizeSettings()
-            { Colors = Colors, DitherMethod = DitherMethod.No, TreeDepth = 8});
-        mImage.Alpha(AlphaOption.Remove);
-
-        // Write ImageMagick Image back into SkiaSharp Image
-        byte[] imageBytes;
-        using (MemoryStream ms = new MemoryStream())
+        SKBitmap accessedBitmap = bitmap.Copy();
+        switch (algorithm)
         {
-            mImage.Write(ms);
-            imageBytes = ms.ToArray();
+            case Algorithm.KMeans:
+                int Iterations = argument == null ? 4 : (int)argument;
+                var kMeans = new KMeans(Colors, Iterations);
+                (quantizedBitmap, colorDictionary) = kMeans.applyKMeans(accessedBitmap, lab);
+                break;
         }
         
-        SKBitmap newBitmap = SKBitmap.Decode(imageBytes);
-
         
-        // Write Colors to the Color Dictionary
-        colorDictionary.Clear();
-        foreach (var (key, value) in mImage.Histogram())
-        {
-            colorDictionary.Add(new Color(key.A,key.R,key.G,key.B),value);
-        }
-        
-        // Return the SkiaSharp Image and Color Directory
-        return (newBitmap,colorDictionary);
+        // Don't even bother asking what int in colorDictionary was used for before, my guess is it was the total amount of that color?? :shrug:
+        return (quantizedBitmap, colorDictionary);
     }
 
     // Gets the Layers from the latest MagickImage
@@ -59,15 +43,7 @@ public class ImageSplitting
         // Generates a Dictionary of <Image,Color>
         Dictionary<SKBitmap, string> Layers = new Dictionary<SKBitmap, string>();
 
-        // Decode ImageMagick to SkiaSharp Image
-        byte[]? imageBytes;
-        using (MemoryStream ms = new MemoryStream())
-        {
-            mImage.Write(ms);
-            imageBytes = ms.ToArray();
-        }
-
-        SKBitmap _Bitmap = SKBitmap.Decode(imageBytes).NormalizeColor();
+        SKBitmap _Bitmap = quantizedBitmap.Copy();
 
         // If lowRes, we only handle a 64x64 image, for previews.
         if (lowRes)

@@ -61,10 +61,39 @@ public class KMeans(int clusters, int iterations)
 
         var centroids = new float[_clusters][];
         var random = new Random();
-        for (int i = 0; i < _clusters; i++)
+        centroids[0] = pixels[random.Next(pixelCount)];
+        for (int i = 1; i < _clusters; i++)
         {
-            centroids[i] = pixels[random.Next(pixelCount)];
+            var distances = new float[pixelCount];
+            for (int j = 0; j < pixelCount; j++)
+            {
+                float minDistance = float.MaxValue;
+                for (int k = 0; k < i; k++)
+                {
+                    float distance = calcDistance(pixels[j], centroids[k]);
+                    if (distance < minDistance)
+                        minDistance = distance;
+                }
+                distances[j] = minDistance;
+            }
+
+            float totalDistance = 0;
+            for (int j = 0; j < pixelCount; j++)
+                totalDistance += distances[j] * distances[j];
+
+            float randomValue = (float)(random.NextDouble() * totalDistance);
+            float sum = 0;
+            for (int j = 0; j < pixelCount; j++)
+            {
+                sum += distances[j] * distances[j];
+                if (sum >= randomValue)
+                {
+                    centroids[i] = pixels[j];
+                    break;
+                }
+            }
         }
+
 
         var assignments = new int[pixelCount];
 

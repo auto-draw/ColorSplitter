@@ -7,6 +7,14 @@ namespace ColorSplitter.Algorithms;
 
 public class KMeans(int clusters, int iterations)
 {
+    public enum clusterAlgorithm
+    {
+        kMeansPP,
+        MedianCut
+    }
+
+    public clusterAlgorithm initializationAlgorithm = clusterAlgorithm.MedianCut;
+    
     public (SKBitmap clusteredBitmap, Dictionary<Color, int> colorCounts) applyKMeans(SKBitmap bitmap, bool LAB = false)
     {
         var pixels = extractPixels(bitmap, LAB);
@@ -54,44 +62,53 @@ public class KMeans(int clusters, int iterations)
         return pixels;
     }
     
+    // k-means++ implementation btw
     private float[][] performKMeans(float[][] pixels, int _clusters, int maxIterations) // k-means is scary, also a bitch to fully understand.
     {
         int pixelCount = pixels.Length;
         int dimension = pixels[0].Length;
-
-        var centroids = new float[_clusters][];
+        
         var random = new Random();
-        centroids[0] = pixels[random.Next(pixelCount)];
-        for (int i = 1; i < _clusters; i++)
+        
+        var centroids = new float[_clusters][];
+        if (initializationAlgorithm == clusterAlgorithm.kMeansPP)
         {
-            var distances = new float[pixelCount];
-            for (int j = 0; j < pixelCount; j++)
+            centroids[0] = pixels[random.Next(pixelCount)];
+            for (int i = 1; i < _clusters; i++)
             {
-                float minDistance = float.MaxValue;
-                for (int k = 0; k < i; k++)
+                var distances = new float[pixelCount];
+                for (int j = 0; j < pixelCount; j++)
                 {
-                    float distance = calcDistance(pixels[j], centroids[k]);
-                    if (distance < minDistance)
-                        minDistance = distance;
+                    float minDistance = float.MaxValue;
+                    for (int k = 0; k < i; k++)
+                    {
+                        float distance = calcDistance(pixels[j], centroids[k]);
+                        if (distance < minDistance)
+                            minDistance = distance;
+                    }
+                    distances[j] = minDistance;
                 }
-                distances[j] = minDistance;
-            }
 
-            float totalDistance = 0;
-            for (int j = 0; j < pixelCount; j++)
-                totalDistance += distances[j] * distances[j];
+                float totalDistance = 0;
+                for (int j = 0; j < pixelCount; j++)
+                    totalDistance += distances[j] * distances[j];
 
-            float randomValue = (float)(random.NextDouble() * totalDistance);
-            float sum = 0;
-            for (int j = 0; j < pixelCount; j++)
-            {
-                sum += distances[j] * distances[j];
-                if (sum >= randomValue)
+                float randomValue = (float)(random.NextDouble() * totalDistance);
+                float sum = 0;
+                for (int j = 0; j < pixelCount; j++)
                 {
-                    centroids[i] = pixels[j];
-                    break;
+                    sum += distances[j] * distances[j];
+                    if (sum >= randomValue)
+                    {
+                        centroids[i] = pixels[j];
+                        break;
+                    }
                 }
             }
+        }else if (initializationAlgorithm == clusterAlgorithm.MedianCut)
+        {
+            var medianCut = new MedianCut();
+            centroids = medianCut.initializeClusters(pixels, _clusters);
         }
 
 

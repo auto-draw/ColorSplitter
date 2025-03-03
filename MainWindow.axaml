@@ -77,7 +77,7 @@
                     </avaloniaControls:AdvancedImageBox>
                 </Canvas>
                 <Grid Grid.Row="2" ColumnDefinitions="*,8,Auto">
-                    <Grid Grid.Column="0" RowDefinitions="15,20,*">
+                    <Grid Grid.Column="0" RowDefinitions="15,20,*,Auto">
                         <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Colors:</Label>
                         <Border Grid.Row="1" Grid.RowSpan="2" Background="#3000" CornerRadius="4"></Border>
                         <ScrollViewer Grid.Row="2" Padding="5 0 0 0" VerticalScrollBarVisibility="Visible">
@@ -89,7 +89,7 @@
                             12
                         </TextBox>
                     </Grid>
-                    <StackPanel Grid.Column="2" MinWidth="153">
+                    <StackPanel Grid.Column="2" MinWidth="179">
                         <Grid RowDefinitions="15,24" Margin="4 0 4 8">
                             <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Mode:</Label>
                             <ComboBox SelectedIndex="0" SelectionChanged="ModeSelector_OnSelectionChanged" Name="ModeSelector" Grid.Row="1" FontSize="11" CornerRadius="4" Background="#3000" Height="24" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
@@ -98,18 +98,27 @@
                                 <ComboBoxItem Content="KMeans RGB"/>
                             </ComboBox>
                         </Grid>
-                        <Grid IsVisible="True" RowDefinitions="15,24" Margin="4 0 4 8">
-                            <Label Name="ArgumentName" Grid.Row="0" HorizontalContentAlignment="Center" Padding="0" Content="Iterations"></Label>
-                            <TextBox IsEnabled="True" Name="ArgumentTextbox" Grid.Row="1" CornerRadius="4" Background="#3000" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
-                                12
-                            </TextBox>
+                        <Grid ColumnDefinitions="*,*" Margin="4 0 4 8">
+                            <Grid RowDefinitions="15,24" Margin="0 0 2 0">
+                                <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Initializer:</Label>
+                                <ComboBox SelectedIndex="0" SelectionChanged="InitializationSelector_OnSelectionChanged" Name="InitializationSelector" Grid.Row="1" FontSize="11" CornerRadius="4" Background="#3000" Height="24" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
+                                    <ComboBoxItem Content="Fast (KM++)"/>
+                                    <ComboBoxItem Content="Accurate (MedianCut)"/>
+                                </ComboBox>
+                            </Grid>
+                            <Grid IsVisible="True" RowDefinitions="15,24" Margin="2 0 0 0" Column="1">
+                                <Label Name="ArgumentName" Grid.Row="0" HorizontalContentAlignment="Center" Padding="0" Content="Iterations"></Label>
+                                <TextBox IsEnabled="True" Name="ArgumentTextbox" Grid.Row="1" CornerRadius="4" Background="#3000" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
+                                    12
+                                </TextBox>
+                            </Grid>
                         </Grid>
                         <Grid RowDefinitions="15,24" Margin="4 0 4 8">
                             <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Alpha Color:</Label>
                             <Button Grid.Row="1" Name="AlphaColor" Classes="noChange" Cursor="Hand" Height="24" Width="{Binding $parent.Bounds.Width}" BorderThickness="1" Background="#3000" BorderBrush="#8cffffff" CornerRadius="4"></Button>
                         </Grid>
-                        <Grid RowDefinitions="24" Margin="4 0 4 8">
-                            <CheckBox Grid.Row="0" Name="RemoveStrayPixelsCheckBox" Content="Remove Stray Pixels" Foreground="White" Checked="RemoveStrayPixelsCheckBox_OnChecked" Unchecked="RemoveStrayPixelsCheckBox_OnUnchecked"/>
+                        <Grid RowDefinitions="24" Margin="4 4 4 0">
+                            <CheckBox Grid.Row="0" Name="RemoveStrayPixelsCheckBox" FontSize="12" Content="Remove Stray Pixels" Foreground="White" Checked="RemoveStrayPixelsCheckBox_OnChecked" Unchecked="RemoveStrayPixelsCheckBox_OnUnchecked"/>
                         </Grid>
                     </StackPanel>
                 </Grid>

@@ -22,7 +22,7 @@ public class ImageSplitting
     }
 
     // Handles Quantization of an Image
-    public static (SKBitmap,Dictionary<Color, int>) colorQuantize(SKBitmap bitmap, Algorithm algorithm = Algorithm.KMeans, object? argument = null, bool lab = true)
+    public static (SKBitmap,Dictionary<Color, int>) colorQuantize(SKBitmap bitmap, Algorithm algorithm = Algorithm.KMeans, object? argument = null, int argument2 = 0, bool lab = true)
     {
         SKBitmap accessedBitmap = bitmap.Copy();
         switch (algorithm)
@@ -30,6 +30,7 @@ public class ImageSplitting
             case Algorithm.KMeans:
                 int Iterations = argument == null ? 4 : (int)argument;
                 var kMeans = new KMeans(Colors, Iterations);
+                kMeans.initializationAlgorithm = (KMeans.clusterAlgorithm)argument2;
                 (quantizedBitmap, colorDictionary) = kMeans.applyKMeans(accessedBitmap, lab);
                 break;
         }

@@ -242,19 +242,21 @@ public partial class MainWindow : Window
             string filteredInput = new string(ArgumentTextbox.Text.Where(char.IsDigit).ToArray());
             _ = int.TryParse(filteredInput, out argNumber);
         }
+
+        var initializerAlgo = InitializationSelector.SelectedIndex;
         
         switch(ModeSelector.SelectedIndex)
         {
             case 0: // OKLAB KM
                 LabHelper.colorSpace = LabHelper.ColorSpace.OKLAB;
-                (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.KMeans, argNumber);
+                (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.KMeans, argNumber, initializerAlgo, true);
                 break;
             case 1: // CIELAB KM
                 LabHelper.colorSpace = LabHelper.ColorSpace.CIELAB;
-                (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.KMeans, argNumber);
+                (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.KMeans, argNumber, initializerAlgo, true);
                 break;
             case 2: // RGB KM
-                (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.KMeans, argNumber, false);
+                (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.KMeans, argNumber, initializerAlgo, false);
                 break;
         }
         
@@ -359,6 +361,12 @@ public partial class MainWindow : Window
     private void ModeSelector_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (ModeSelector is null) return; // Uninitialized
+        updateQuantize();
+    }
+    
+    private void InitializationSelector_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (InitializationSelector is null) return; // Uninitialized
         updateQuantize();
     }
 

@@ -79,6 +79,9 @@ public partial class MainWindow : Window
                 });
         };
         
+        // Stray Pixel Removal
+        RemoveStrayPixelsCheckBox.IsChecked = ImageSplitting.RemoveStrayPixels;
+        
         // Init Color View Config
         ColorView.Palette = new SixteenColorPalette();
 
@@ -356,6 +359,20 @@ public partial class MainWindow : Window
     private void ModeSelector_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (ModeSelector is null) return; // Uninitialized
+        updateQuantize();
+    }
+
+    // Event handler for the RemoveStrayPixelsCheckBox Checked event
+    private void RemoveStrayPixelsCheckBox_OnChecked(object? sender, RoutedEventArgs e)
+    {
+        ImageSplitting.RemoveStrayPixels = true;
+        updateQuantize();
+    }
+
+    // Event handler for the RemoveStrayPixelsCheckBox Unchecked event
+    private void RemoveStrayPixelsCheckBox_OnUnchecked(object? sender, RoutedEventArgs e)
+    {
+        ImageSplitting.RemoveStrayPixels = false;
         updateQuantize();
     }
 }

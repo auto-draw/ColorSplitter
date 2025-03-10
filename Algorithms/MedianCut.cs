@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Media;
 using SkiaSharp;
 
@@ -36,7 +37,11 @@ public class MedianCut
         return bins.Select(CalculateAverage).ToArray();
     }
 
-    private (SKBitmap quantizedBitmap, Dictionary<Color, int> colorCounts) MapPixelsToClosestColors(SKBitmap bitmap, float[][] pixels, float[][] representativeColors, bool useLAB)
+    private (SKBitmap quantizedBitmap, Dictionary<Color, int> colorCounts) MapPixelsToClosestColors(
+        SKBitmap bitmap, 
+        float[][] pixels, 
+        float[][] representativeColors,
+        bool useLAB)
     {
         int width = bitmap.Width;
         int height = bitmap.Height;
@@ -49,7 +54,7 @@ public class MedianCut
         {
             var ptr = (byte*)outputPtr.ToPointer();
 
-            for (int i = 0; i < pixels.Length; i++)
+            Parallel.For(0, pixels.Length, i =>
             {
                 var closestColor = FindClosestColor(pixels[i], representativeColors, useLAB);
 
@@ -68,10 +73,11 @@ public class MedianCut
                     r = closestColor[2];
                 }
 
-                ptr[i * 4] = (byte)Math.Clamp(b, 0, 255);     
-                ptr[i * 4 + 1] = (byte)Math.Clamp(g, 0, 255); 
-                ptr[i * 4 + 2] = (byte)Math.Clamp(r, 0, 255); 
-                ptr[i * 4 + 3] = 255;                         
+                int idx = i * 4; // Pointer position
+                ptr[idx] = (byte)Math.Clamp(b, 0, 255);
+                ptr[idx + 1] = (byte)Math.Clamp(g, 0, 255);
+                ptr[idx + 2] = (byte)Math.Clamp(r, 0, 255);
+                ptr[idx + 3] = 255;
 
                 var skiaColor = Color.FromArgb(
                     255,
@@ -80,25 +86,34 @@ public class MedianCut
                     (byte)Math.Clamp(b, 0, 255)
                 );
 
-                colorCounts[skiaColor] = colorCounts.GetValueOrDefault(skiaColor) + 1;
-            }
+                lock (colorCounts)
+                {
+                    if (!colorCounts.TryAdd(skiaColor, 1))
+                    {
+                        colorCounts[skiaColor]++;
+                    }
+                }
+            });
         }
 
         return (outputBitmap, colorCounts);
     }
+
 
     private float[][] ExtractPixels(SKBitmap bitmap, bool useLAB)
     {
         int width = bitmap.Width;
         int height = bitmap.Height;
 
+        // Prealloc arrays
         var pixels = new float[width * height][];
         var srcPtr = bitmap.GetPixels();
 
         unsafe
         {
             var ptr = (byte*)srcPtr.ToPointer();
-            for (int i = 0; i < width * height; i++)
+
+            Parallel.For(0, width * height, i =>
             {
                 float b = ptr[i * 4];
                 float g = ptr[i * 4 + 1];
@@ -113,7 +128,7 @@ public class MedianCut
                 {
                     pixels[i] = new[] { b, g, r };
                 }
-            }
+            });
         }
 
         return pixels;
@@ -126,7 +141,22 @@ public class MedianCut
 
         foreach (var color in representativeColors)
         {
-            float distance = CalculateDistance(pixel, color, useLAB);
+            float distance;
+
+            // avoid Math.Sqrt when possible
+            if (useLAB)
+            {
+                distance = (pixel[0] - color[0]) * (pixel[0] - color[0])
+                           + (pixel[1] - color[1]) * (pixel[1] - color[1])
+                           + (pixel[2] - color[2]) * (pixel[2] - color[2]);
+            }
+            else
+            {
+                distance = (pixel[0] - color[0]) * (pixel[0] - color[0]) +
+                           (pixel[1] - color[1]) * (pixel[1] - color[1]) +
+                           (pixel[2] - color[2]) * (pixel[2] - color[2]);
+            }
+
             if (distance < minDistance)
             {
                 minDistance = distance;

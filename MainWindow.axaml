@@ -6,7 +6,7 @@
         xmlns:avaloniaControls="clr-namespace:UVtools.AvaloniaControls;assembly=UVtools.AvaloniaControls"
 
         mc:Ignorable="d" d:DesignWidth="588" d:DesignHeight="450"
-        x:Name="csp"
+        x:Name="ColorSplitter"
         
         Width="572"
         Height="430"
@@ -17,7 +17,7 @@
         MinHeight="430"
         WindowStartupLocation="CenterScreen"
         
-        Title="csp"
+        Title="ColorSplitter"
 
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"

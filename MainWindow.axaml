@@ -18,7 +18,8 @@
         WindowStartupLocation="CenterScreen"
         
         Title="ColorSplitter"
-
+        Icon="/Assets/color_wheel.ico"
+        
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="20">

@@ -6,6 +6,8 @@ This software takes an input image, quantize's it down to best fit, and then sep
 The use case of this application primarily focuses on AutoDraw, and other similar applications.
 This application can also be used in other fields of use, such as color analysis, palette extraction, and general use in image processing, amongst other tools.
 
+*Application icon is provided by [fatcow](http://www.fatcow.com/free-icons) under CC Attribution 3.0*
+
 ### Lets compare:
 
 Please note, **no color space is perfect** for one job, just as much as **no algorithm is perfect**, so play around with them when quantizing images, you may find better results that way.
@@ -70,6 +72,7 @@ Once you've chosen your target operating system, it will generate a build file i
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
+Icon is provided by [fatcow](http://www.fatcow.com/free-icons) under CC Attribution 3.0
 
 ## Contact
 For any questions or suggestions, feel free to contact AlexDalas or Siydge on our [Discord](https://discord.gg/2rvVtb32qA).

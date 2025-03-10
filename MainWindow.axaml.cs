@@ -247,17 +247,29 @@ public partial class MainWindow : Window
         
         switch(ModeSelector.SelectedIndex)
         {
-            case 0: // OKLAB KM
+            case 0: // OKLAB K-Means
                 LabHelper.colorSpace = LabHelper.ColorSpace.OKLAB;
                 (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.KMeans, argNumber, initializerAlgo, true);
                 break;
-            case 1: // CIELAB KM
+            case 1: // CIELAB K-Means
                 LabHelper.colorSpace = LabHelper.ColorSpace.CIELAB;
                 (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.KMeans, argNumber, initializerAlgo, true);
                 break;
-            case 2: // RGB KM
+            case 2: // RGB   K-Means
                 (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.KMeans, argNumber, initializerAlgo, false);
                 break;
+            case 3: // OKLAB Median-Cut
+                LabHelper.colorSpace = LabHelper.ColorSpace.OKLAB;
+                (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.MedianCut, argNumber, initializerAlgo, true);
+                break;
+            case 4: // CIELAB Median-Cut
+                LabHelper.colorSpace = LabHelper.ColorSpace.CIELAB;
+                (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.MedianCut, argNumber, initializerAlgo, true);
+                break;
+            case 5: // RGB   Median-Cut
+                (bmp,colors) = ImageSplitting.colorQuantize(_rawBitmap, ImageSplitting.Algorithm.MedianCut, argNumber, initializerAlgo, false);
+                break;
+                
         }
         
         // Store new variable for quantized image, also stops GarbageCollection.
@@ -361,6 +373,20 @@ public partial class MainWindow : Window
     private void ModeSelector_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (ModeSelector is null) return; // Uninitialized
+        switch (ModeSelector.SelectedIndex)
+        {
+            case 0: // OKLAB K-Means
+            case 1: // CIELAB K-Means
+            case 2: // RGB   K-Means
+                Arguments.IsVisible = true;
+                break;
+            case 3: // OKLAB Median-Cut
+            case 4: // CIELAB Median-Cut
+            case 5: // RGB   Median-Cut
+                Arguments.IsVisible = false;
+                break;
+        }
+
         updateQuantize();
     }
     
@@ -373,6 +399,7 @@ public partial class MainWindow : Window
     // Event handler for the RemoveStrayPixelsCheckBox Checked event
     private void RemoveStrayPixelsCheckBox_OnChecked(object? sender, RoutedEventArgs e)
     {
+        if (RemoveStrayPixelsCheckBox is null) return; // Uninitialized
         ImageSplitting.RemoveStrayPixels = true;
         updateQuantize();
     }
@@ -380,7 +407,14 @@ public partial class MainWindow : Window
     // Event handler for the RemoveStrayPixelsCheckBox Unchecked event
     private void RemoveStrayPixelsCheckBox_OnUnchecked(object? sender, RoutedEventArgs e)
     {
+        if (RemoveStrayPixelsCheckBox is null) return; // Uninitialized
         ImageSplitting.RemoveStrayPixels = false;
+        updateQuantize();
+    }
+
+    private void ArgumentTextbox_OnTextChanging(object? sender, TextChangingEventArgs e)
+    {
+        if (ArgumentTextbox is null) return; // Uninitialized
         updateQuantize();
     }
 }

@@ -1,109 +1,48 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Media;
 using SkiaSharp;
 
 namespace ColorSplitter.Algorithms;
 
 public class MedianCut
 {
-    public SKBitmap quantize(SKBitmap bitmap, int numColors, bool useLAB = false)
+    public (SKBitmap quantizedBitmap, Dictionary<Color, int> colorCounts) Quantize(SKBitmap bitmap, int numColors, bool useLAB = false)
     {
-        var pixels = extractPixels(bitmap, useLAB);
+        var pixels = ExtractPixels(bitmap, useLAB);
 
-        var representativeColors = performMedianCut(pixels, numColors);
+        var representativeColors = PerformMedianCut(pixels, numColors, useLAB);
 
-        var quantizedBitmap = mapPixelsToClosestColor(bitmap, pixels, representativeColors);
+        var (quantizedBitmap, colorCounts) = MapPixelsToClosestColors(bitmap, pixels, representativeColors, useLAB);
 
-        return quantizedBitmap;
+        return (quantizedBitmap, colorCounts);
     }
 
-    // For improving the KMeans cluster initialization :P
-    public float[][] initializeClusters(float[][] pixels, int numClusters)
-    {
-        return performMedianCut(pixels, numClusters);
-    }
-
-    private float[][] performMedianCut(float[][] pixels, int numColors)
+    public float[][] PerformMedianCut(float[][] pixels, int numColors, bool useLAB)
     {
         var bins = new List<List<float[]>> { pixels.ToList() };
 
         while (bins.Count < numColors)
         {
-            var binToSplit = bins.OrderByDescending(bin => calculateVariance(bin)).First();
+            var binToSplit = bins.OrderByDescending(bin => CalculateMaxVariance(bin)).First();
             bins.Remove(binToSplit);
 
-            var (bin1, bin2) = splitBin(binToSplit);
-
+            var (bin1, bin2) = SplitBin(binToSplit);
             bins.Add(bin1);
             bins.Add(bin2);
         }
 
-        return bins.Select(bin => calculateAverage(bin)).ToArray();
+        return bins.Select(CalculateAverage).ToArray();
     }
 
-    private (List<float[]> bin1, List<float[]> bin2) splitBin(List<float[]> bin)
-    {
-        int dimension = bin[0].Length;
-        float[] minValues = new float[dimension];
-        float[] maxValues = new float[dimension];
-
-        for (int i = 0; i < dimension; i++)
-        {
-            minValues[i] = bin.Min(pixel => pixel[i]);
-            maxValues[i] = bin.Max(pixel => pixel[i]);
-        }
-
-        int splitAxis = Array.IndexOf(maxValues, maxValues.Max());
-
-        var sortedBin = bin.OrderBy(pixel => pixel[splitAxis]).ToList();
-        int medianIndex = sortedBin.Count / 2;
-
-        return (sortedBin.Take(medianIndex).ToList(), sortedBin.Skip(medianIndex).ToList());
-    }
-    
-    private float[] calculateAverage(List<float[]> bin)
-    {
-        int dimension = bin[0].Length;
-        float[] average = new float[dimension];
-
-        foreach (var pixel in bin)
-        {
-            for (int i = 0; i < dimension; i++)
-            {
-                average[i] += pixel[i];
-            }
-        }
-
-        for (int i = 0; i < dimension; i++)
-        {
-            average[i] /= bin.Count;
-        }
-
-        return average;
-    }
-
-    private float calculateVariance(List<float[]> bin)
-    {
-        int dimension = bin[0].Length;
-        float totalVariance = 0;
-
-        for (int i = 0; i < dimension; i++)
-        {
-            float mean = bin.Average(pixel => pixel[i]);
-            float variance = bin.Sum(pixel => (pixel[i] - mean) * (pixel[i] - mean)) / bin.Count;
-            totalVariance += variance;
-        }
-
-        return totalVariance;
-    }
-
-    private SKBitmap mapPixelsToClosestColor(SKBitmap bitmap, float[][] pixels, float[][] representativeColors)
+    private (SKBitmap quantizedBitmap, Dictionary<Color, int> colorCounts) MapPixelsToClosestColors(SKBitmap bitmap, float[][] pixels, float[][] representativeColors, bool useLAB)
     {
         int width = bitmap.Width;
         int height = bitmap.Height;
 
         var outputBitmap = new SKBitmap(width, height);
+        var colorCounts = new Dictionary<Color, int>();
         var outputPtr = outputBitmap.GetPixels();
 
         unsafe
@@ -112,37 +51,43 @@ public class MedianCut
 
             for (int i = 0; i < pixels.Length; i++)
             {
-                var closestColor = findClosestColor(pixels[i], representativeColors);
+                var closestColor = FindClosestColor(pixels[i], representativeColors, useLAB);
 
-                ptr[i * 4] = (byte)closestColor[0];     // B
-                ptr[i * 4 + 1] = (byte)closestColor[1]; // G
-                ptr[i * 4 + 2] = (byte)closestColor[2]; // R
-                ptr[i * 4 + 3] = 255;                  // A
+                float r, g, b;
+                if (useLAB)
+                {
+                    var converted = LabHelper.LabToRgb(closestColor[0], closestColor[1], closestColor[2]);
+                    r = converted[0];
+                    g = converted[1];
+                    b = converted[2];
+                }
+                else
+                {
+                    b = closestColor[0];
+                    g = closestColor[1];
+                    r = closestColor[2];
+                }
+
+                ptr[i * 4] = (byte)Math.Clamp(b, 0, 255);     
+                ptr[i * 4 + 1] = (byte)Math.Clamp(g, 0, 255); 
+                ptr[i * 4 + 2] = (byte)Math.Clamp(r, 0, 255); 
+                ptr[i * 4 + 3] = 255;                         
+
+                var skiaColor = Color.FromArgb(
+                    255,
+                    (byte)Math.Clamp(r, 0, 255),
+                    (byte)Math.Clamp(g, 0, 255),
+                    (byte)Math.Clamp(b, 0, 255)
+                );
+
+                colorCounts[skiaColor] = colorCounts.GetValueOrDefault(skiaColor) + 1;
             }
         }
 
-        return outputBitmap;
+        return (outputBitmap, colorCounts);
     }
 
-    private float[] findClosestColor(float[] pixel, float[][] representativeColors)
-    {
-        float minDistance = float.MaxValue;
-        float[] closestColor = null;
-
-        foreach (var color in representativeColors)
-        {
-            float distance = calcDistance(pixel, color);
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                closestColor = color;
-            }
-        }
-
-        return closestColor;
-    }
-
-    private float[][] extractPixels(SKBitmap bitmap, bool useLAB)
+    private float[][] ExtractPixels(SKBitmap bitmap, bool useLAB)
     {
         int width = bitmap.Width;
         int height = bitmap.Height;
@@ -153,12 +98,11 @@ public class MedianCut
         unsafe
         {
             var ptr = (byte*)srcPtr.ToPointer();
-
             for (int i = 0; i < width * height; i++)
             {
-                float r = ptr[i * 4 + 2];
-                float g = ptr[i * 4 + 1];
                 float b = ptr[i * 4];
+                float g = ptr[i * 4 + 1];
+                float r = ptr[i * 4 + 2];
 
                 if (useLAB)
                 {
@@ -167,7 +111,7 @@ public class MedianCut
                 }
                 else
                 {
-                    pixels[i] = new[] { r, g, b };
+                    pixels[i] = new[] { b, g, r };
                 }
             }
         }
@@ -175,15 +119,87 @@ public class MedianCut
         return pixels;
     }
 
-    private float calcDistance(float[] a, float[] b)
+    private float[] FindClosestColor(float[] pixel, float[][] representativeColors, bool useLAB)
     {
-        float distance = 0;
+        float minDistance = float.MaxValue;
+        float[] closestColor = null;
 
-        for (int i = 0; i < a.Length; i++)
+        foreach (var color in representativeColors)
         {
-            distance += (a[i] - b[i]) * (a[i] - b[i]);
+            float distance = CalculateDistance(pixel, color, useLAB);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closestColor = color;
+            }
         }
 
-        return (float)Math.Sqrt(distance);
+        return closestColor;
+    }
+
+    private float CalculateDistance(float[] pixel1, float[] pixel2, bool useLAB)
+    {
+        float distance = 0;
+        for (int i = 0; i < pixel1.Length; i++)
+        {
+            distance += (pixel1[i] - pixel2[i]) * (pixel1[i] - pixel2[i]);
+        }
+
+        return MathF.Sqrt(distance);
+    }
+
+    private float CalculateMaxVariance(List<float[]> bin)
+    {
+        int dimensions = bin[0].Length;
+        float maxVariance = 0;
+
+        for (int i = 0; i < dimensions; i++)
+        {
+            float mean = bin.Average(pixel => pixel[i]);
+            float variance = bin.Sum(pixel => (pixel[i] - mean) * (pixel[i] - mean)) / bin.Count;
+            maxVariance = Math.Max(maxVariance, variance);
+        }
+
+        return maxVariance;
+    }
+
+    private (List<float[]> Bin1, List<float[]> Bin2) SplitBin(List<float[]> bin)
+    {
+        int dimensions = bin[0].Length;
+
+        float[] ranges = new float[dimensions];
+
+        for (int i = 0; i < dimensions; i++)
+        {
+            ranges[i] = bin.Max(pixel => pixel[i]) - bin.Min(pixel => pixel[i]);
+        }
+
+        int splitAxis = Array.IndexOf(ranges, ranges.Max());
+
+        var sortedBin = bin.OrderBy(pixel => pixel[splitAxis]).ToList();
+        int medianIndex = sortedBin.Count / 2;
+
+        return (sortedBin.Take(medianIndex).ToList(), sortedBin.Skip(medianIndex).ToList());
+    }
+
+    private float[] CalculateAverage(List<float[]> bin)
+    {
+        int dimensions = bin[0].Length;
+        float[] average = new float[dimensions];
+
+        foreach (var pixel in bin)
+        {
+            for (int i = 0; i < dimensions; i++)
+            {
+                average[i] += pixel[i];
+            }
+        }
+
+        for (int i = 0; i < dimensions; i++)
+        {
+            average[i] /= bin.Count;
+        }
+
+        return average;
     }
 }

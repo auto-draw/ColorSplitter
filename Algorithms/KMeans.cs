@@ -19,7 +19,7 @@ public class KMeans(int clusters, int iterations)
     {
         var pixels = extractPixels(bitmap, LAB);
 
-        var clusteredPixels = performKMeans(pixels, clusters, iterations);
+        var clusteredPixels = performKMeans(pixels, clusters, iterations, LAB);
 
         var colorCounts = new Dictionary<Color, int>();
         
@@ -63,7 +63,7 @@ public class KMeans(int clusters, int iterations)
     }
     
     // k-means++ implementation btw
-    private float[][] performKMeans(float[][] pixels, int _clusters, int maxIterations) // k-means is scary, also a bitch to fully understand.
+    private float[][] performKMeans(float[][] pixels, int _clusters, int maxIterations, bool LAB) // k-means is scary, also a bitch to fully understand.
     {
         int pixelCount = pixels.Length;
         int dimension = pixels[0].Length;
@@ -108,7 +108,7 @@ public class KMeans(int clusters, int iterations)
         }else if (initializationAlgorithm == clusterAlgorithm.MedianCut)
         {
             var medianCut = new MedianCut();
-            centroids = medianCut.initializeClusters(pixels, _clusters);
+            centroids = medianCut.PerformMedianCut(pixels, _clusters, LAB);
         }
 
 
@@ -218,10 +218,10 @@ public class KMeans(int clusters, int iterations)
                     color = Color.FromArgb(255, (byte)pixel[0], (byte)pixel[1], (byte)pixel[2]);
                 }
 
-                ptr[i * 4 + 2] = color.R; // R
-                ptr[i * 4 + 1] = color.G; // G
                 ptr[i * 4] = color.B;     // B
-                ptr[i * 4 + 3] = 255;            // A
+                ptr[i * 4 + 1] = color.G; // G
+                ptr[i * 4 + 2] = color.R; // R
+                ptr[i * 4 + 3] = 255;     // A
 
                 if (!colorCounts.TryAdd(color, 1))
                     colorCounts[color]++;

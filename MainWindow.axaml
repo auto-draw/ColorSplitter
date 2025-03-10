@@ -96,9 +96,12 @@
                                 <ComboBoxItem Content="KMeans OKLab"/>
                                 <ComboBoxItem Content="KMeans CIELab"/>
                                 <ComboBoxItem Content="KMeans RGB"/>
+                                <ComboBoxItem Content="MedianCut OKLab"/>
+                                <ComboBoxItem Content="MedianCut CIELab"/>
+                                <ComboBoxItem Content="MedianCut RGB"/>
                             </ComboBox>
                         </Grid>
-                        <Grid ColumnDefinitions="*,*" Margin="4 0 4 8">
+                        <Grid Name="Arguments" ColumnDefinitions="*,*" Margin="4 0 4 8">
                             <Grid RowDefinitions="15,24" Margin="0 0 2 0">
                                 <Label Grid.Row="0" HorizontalContentAlignment="Center" Padding="0">Initializer:</Label>
                                 <ComboBox SelectedIndex="0" SelectionChanged="InitializationSelector_OnSelectionChanged" Name="InitializationSelector" Grid.Row="1" FontSize="11" CornerRadius="4" Background="#3000" Height="24" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
@@ -108,7 +111,7 @@
                             </Grid>
                             <Grid IsVisible="True" RowDefinitions="15,24" Margin="2 0 0 0" Column="1">
                                 <Label Name="ArgumentName" Grid.Row="0" HorizontalContentAlignment="Center" Padding="0" Content="Iterations"></Label>
-                                <TextBox IsEnabled="True" Name="ArgumentTextbox" Grid.Row="1" CornerRadius="4" Background="#3000" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
+                                <TextBox IsEnabled="True" TextChanging="ArgumentTextbox_OnTextChanging" Name="ArgumentTextbox" Grid.Row="1" CornerRadius="4" Background="#3000" BorderBrush="#8cffffff" Width="{Binding $parent.Bounds.Width}" HorizontalAlignment="Center">
                                     12
                                 </TextBox>
                             </Grid>

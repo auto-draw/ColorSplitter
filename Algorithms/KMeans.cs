@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Avalonia.Media;
 using SkiaSharp;
 
@@ -33,15 +34,14 @@ public class KMeans(int clusters, int iterations)
     {
         int width = bitmap.Width;
         int height = bitmap.Height;
-
-        var pixels = new float[width * height][];
         var srcPtr = bitmap.GetPixels();
+        var pixels = new float[width * height][];
 
         unsafe
         {
-            var ptr = (byte*)srcPtr.ToPointer();
+            byte* ptr = (byte*)srcPtr.ToPointer();
 
-            for (int i = 0; i < width * height; i++)
+            Parallel.For(0, width * height, i =>
             {
                 float r = ptr[i * 4 + 2];
                 float g = ptr[i * 4 + 1];
@@ -49,18 +49,18 @@ public class KMeans(int clusters, int iterations)
 
                 if (LAB)
                 {
-                    var lab = LabHelper.RgbToLab(r, g, b);
-                    pixels[i] = [lab[0], lab[1], lab[2]];
+                    pixels[i] = LabHelper.RgbToLab(r, g, b);
                 }
                 else
                 {
                     pixels[i] = [r, g, b];
                 }
-            }
+            });
         }
 
         return pixels;
     }
+
     
     // k-means++ implementation btw
     private float[][] performKMeans(float[][] pixels, int _clusters, int maxIterations, bool LAB) // k-means is scary, also a bitch to fully understand.
@@ -77,6 +77,7 @@ public class KMeans(int clusters, int iterations)
             for (int i = 1; i < _clusters; i++)
             {
                 var distances = new float[pixelCount];
+                
                 for (int j = 0; j < pixelCount; j++)
                 {
                     float minDistance = float.MaxValue;

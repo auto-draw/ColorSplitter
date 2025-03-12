@@ -31,8 +31,8 @@ public class ImageSplitting
             case Algorithm.KMeans:
                 int Iterations = argument == null ? 4 : (int)argument;
                 var kMeans = new KMeans(Colors, Iterations);
-                kMeans.initializationAlgorithm = (KMeans.clusterAlgorithm)argument2;
-                (quantizedBitmap, colorDictionary) = kMeans.applyKMeans(accessedBitmap, lab);
+                kMeans.InitializationAlgorithm = (KMeans.ClusterAlgorithm)argument2;
+                (quantizedBitmap, colorDictionary) = kMeans.ApplyKMeans(accessedBitmap, lab);
                 break;
             case Algorithm.MedianCut:
                 var medianCut = new MedianCut();

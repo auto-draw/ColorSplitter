@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media;
 using SkiaSharp;
@@ -8,110 +10,58 @@ namespace ColorSplitter.Algorithms;
 
 public class KMeans(int clusters, int iterations)
 {
-    public enum clusterAlgorithm
+    public enum ClusterAlgorithm
     {
-        kMeansPP,
+        KMeansPP,
         MedianCut
     }
 
-    public clusterAlgorithm initializationAlgorithm = clusterAlgorithm.MedianCut;
-    
-    public (SKBitmap clusteredBitmap, Dictionary<Color, int> colorCounts) applyKMeans(SKBitmap bitmap, bool LAB = false)
-    {
-        var pixels = extractPixels(bitmap, LAB);
+    public ClusterAlgorithm InitializationAlgorithm { get; set; } = ClusterAlgorithm.MedianCut;
 
-        var clusteredPixels = performKMeans(pixels, clusters, iterations, LAB);
+    public (SKBitmap ClusteredBitmap, Dictionary<Color, int> ColorCounts) ApplyKMeans(SKBitmap bitmap, bool LAB = false)
+    {
+        var pixels = ExtractPixels(bitmap, LAB);
+
+        var clusteredPixels = PerformKMeans(pixels, clusters, iterations, LAB);
 
         var colorCounts = new Dictionary<Color, int>();
-        
-        var clusteredBitmap = clusterBitmap(clusteredPixels, bitmap.Width, bitmap.Height, LAB, colorCounts);
+        var clusteredBitmap = ClusterBitmap(clusteredPixels, bitmap.Width, bitmap.Height, LAB, colorCounts);
 
         return (clusteredBitmap, colorCounts);
     }
 
-    
-    private float[][] extractPixels(SKBitmap bitmap, bool LAB)
+    private unsafe float[][] ExtractPixels(SKBitmap bitmap, bool LAB)
     {
         int width = bitmap.Width;
         int height = bitmap.Height;
-        var srcPtr = bitmap.GetPixels();
-        var pixels = new float[width * height][];
+        int totalPixels = width * height;
 
-        unsafe
+        var srcPtr = (byte*)bitmap.GetPixels().ToPointer();
+        var pixels = new float[totalPixels][];
+
+        Parallel.For(0, totalPixels, i =>
         {
-            byte* ptr = (byte*)srcPtr.ToPointer();
+            int idx = i * 4;
+            float r = srcPtr[idx + 2];
+            float g = srcPtr[idx + 1];
+            float b = srcPtr[idx];
 
-            Parallel.For(0, width * height, i =>
-            {
-                float r = ptr[i * 4 + 2];
-                float g = ptr[i * 4 + 1];
-                float b = ptr[i * 4];
-
-                if (LAB)
-                {
-                    pixels[i] = LabHelper.RgbToLab(r, g, b);
-                }
-                else
-                {
-                    pixels[i] = [r, g, b];
-                }
-            });
-        }
+            pixels[i] = LAB 
+                ? LabHelper.RgbToLab(r, g, b) 
+                : new[] { r, g, b };
+        });
 
         return pixels;
     }
 
-    
-    // k-means++ implementation btw
-    private float[][] performKMeans(float[][] pixels, int _clusters, int maxIterations, bool LAB) // k-means is scary, also a bitch to fully understand.
+    private float[][] PerformKMeans(float[][] pixels, int clusterCount, int maxIterations, bool LAB)
     {
         int pixelCount = pixels.Length;
-        int dimension = pixels[0].Length;
-        
         var random = new Random();
-        
-        var centroids = new float[_clusters][];
-        if (initializationAlgorithm == clusterAlgorithm.kMeansPP)
-        {
-            centroids[0] = pixels[random.Next(pixelCount)];
-            for (int i = 1; i < _clusters; i++)
-            {
-                var distances = new float[pixelCount];
-                
-                for (int j = 0; j < pixelCount; j++)
-                {
-                    float minDistance = float.MaxValue;
-                    for (int k = 0; k < i; k++)
-                    {
-                        float distance = calcDistance(pixels[j], centroids[k]);
-                        if (distance < minDistance)
-                            minDistance = distance;
-                    }
-                    distances[j] = minDistance;
-                }
 
-                float totalDistance = 0;
-                for (int j = 0; j < pixelCount; j++)
-                    totalDistance += distances[j] * distances[j];
-
-                float randomValue = (float)(random.NextDouble() * totalDistance);
-                float sum = 0;
-                for (int j = 0; j < pixelCount; j++)
-                {
-                    sum += distances[j] * distances[j];
-                    if (sum >= randomValue)
-                    {
-                        centroids[i] = pixels[j];
-                        break;
-                    }
-                }
-            }
-        }else if (initializationAlgorithm == clusterAlgorithm.MedianCut)
-        {
-            var medianCut = new MedianCut();
-            centroids = medianCut.PerformMedianCut(pixels, _clusters, LAB);
-        }
-
+        var centroids = InitializationAlgorithm == ClusterAlgorithm.KMeansPP
+            ? InitializeKMeansPP(pixels, clusterCount, random)
+            : new MedianCut().PerformMedianCut(pixels, clusterCount, LAB);
 
         var assignments = new int[pixelCount];
 
@@ -119,116 +69,162 @@ public class KMeans(int clusters, int iterations)
         {
             bool hasChanged = false;
 
-            for (int i = 0; i < pixelCount; i++)
+            Parallel.For(0, pixelCount, i =>
             {
-                int closestCluster = findClosestCluster(pixels[i], centroids);
+                int closestCluster = FindClosestCluster(pixels[i], centroids);
                 if (assignments[i] != closestCluster)
                 {
                     assignments[i] = closestCluster;
                     hasChanged = true;
                 }
-            }
+            });
 
-            if (!hasChanged)
-                break;
+            if (!hasChanged) break;
 
-            var newCentroids = new float[_clusters][];
-            var counts = new int[_clusters];
+            var clusterSums = new float[clusterCount][];
+            var clusterCounts = new int[clusterCount];
 
-            for (int i = 0; i < _clusters; i++)
-                newCentroids[i] = new float[dimension];
-
-            for (int i = 0; i < pixelCount; i++)
+            for (int i = 0; i < clusterCount; i++)
             {
-                int cluster = assignments[i];
-                for (int j = 0; j < dimension; j++)
-                    newCentroids[cluster][j] += pixels[i][j];
-
-                counts[cluster]++;
+                clusterSums[i] = new float[pixels[0].Length];
             }
 
-            for (int i = 0; i < _clusters; i++)
-                if (counts[i] > 0)
-                    for (int j = 0; j < dimension; j++)
-                        newCentroids[i][j] /= counts[i];
-                else
-                    newCentroids[i] = pixels[random.Next(pixelCount)];
+            Parallel.For(0, pixelCount, i =>
+            {
+                int clusterId = assignments[i];
+                lock (clusterSums[clusterId])
+                {
+                    for (int d = 0; d < pixels[i].Length; d++)
+                        clusterSums[clusterId][d] += pixels[i][d];
 
-            centroids = newCentroids;
+                    clusterCounts[clusterId]++;
+                }
+            });
+
+            Parallel.For(0, clusterCount, k =>
+            {
+                if (clusterCounts[k] > 0)
+                {
+                    for (int d = 0; d < clusterSums[k].Length; d++)
+                        clusterSums[k][d] /= clusterCounts[k];
+
+                    centroids[k] = clusterSums[k];
+                }
+                else
+                {
+                    centroids[k] = pixels[random.Next(pixelCount)];
+                }
+            });
         }
 
-        for (int i = 0; i < pixelCount; i++)
-            pixels[i] = centroids[assignments[i]];
-
-        return pixels;
+        return assignments.Select(clusterId => centroids[clusterId]).ToArray();
     }
-    
-    private int findClosestCluster(float[] pixel, float[][] centroids)
+
+    private float[][] InitializeKMeansPP(float[][] pixels, int clusterCount, Random random)
     {
-        int closestIndex = 0;
+        int pixelCount = pixels.Length;
+        var centroids = new float[clusterCount][];
+
+        centroids[0] = pixels[random.Next(pixelCount)];
+        for (int i = 1; i < clusterCount; i++)
+        {
+            var distances = new float[pixelCount];
+            Parallel.For(0, pixelCount, j =>
+            {
+                float minDistance = float.MaxValue;
+                for (int k = 0; k < i; k++)
+                {
+                    float distance = CalcDistance(pixels[j], centroids[k]);
+                    if (distance < minDistance)
+                        minDistance = distance;
+                }
+                distances[j] = minDistance;
+            });
+
+            float totalDistance = distances.Sum();
+            float randomValue = (float)(random.NextDouble() * totalDistance);
+            float cumulative = 0;
+
+            for (int j = 0; j < pixelCount; j++)
+            {
+                cumulative += distances[j];
+                if (cumulative >= randomValue)
+                {
+                    centroids[i] = pixels[j];
+                    break;
+                }
+            }
+        }
+
+        return centroids;
+    }
+
+    private int FindClosestCluster(float[] pixel, float[][] centroids)
+    {
         float minDistance = float.MaxValue;
+        int closest = 0;
 
         for (int i = 0; i < centroids.Length; i++)
         {
-            float distance = calcDistance(pixel, centroids[i]);
-
+            float distance = CalcDistance(pixel, centroids[i]);
             if (distance < minDistance)
             {
                 minDistance = distance;
-                closestIndex = i;
+                closest = i;
             }
         }
 
-        return closestIndex;
+        return closest;
     }
 
-    private float calcDistance(float[] a, float[] b) // calc stands for calculator btw
+    private unsafe SKBitmap ClusterBitmap(float[][] clusteredPixels, int width, int height, bool LAB, Dictionary<Color, int> colorCounts)
     {
-        float distance = 0;
+        var outputBitmap = new SKBitmap(width, height);
+        var outputPtr = (byte*)outputBitmap.GetPixels().ToPointer();
 
-        for (int i = 0; i < a.Length; i++)
+        Parallel.For(0, clusteredPixels.Length, i =>
         {
-            float diff = a[i] - b[i];
-            distance += diff * diff;
-        }
+            float r, g, b;
 
-        return distance;
-    }
-
-    private SKBitmap clusterBitmap(float[][] clusteredPixels, int width, int height, bool LAB, Dictionary<Color, int> colorCounts)
-    {
-        var processedBitmap = new SKBitmap(width, height);
-        var dstPtr = processedBitmap.GetPixels();
-
-        unsafe
-        {
-            var ptr = (byte*)dstPtr.ToPointer();
-
-            for (int i = 0; i < clusteredPixels.Length; i++)
+            if (LAB)
             {
-                float[] pixel = clusteredPixels[i];
-                Color color;
+                var rgb = LabHelper.LabToRgb(clusteredPixels[i][0], clusteredPixels[i][1], clusteredPixels[i][2]);
+                r = rgb[0];
+                g = rgb[1];
+                b = rgb[2];
+            }
+            else
+            {
+                // Don't bother asking, I don't know where it got flipped around twice.
+                r = clusteredPixels[i][0];
+                g = clusteredPixels[i][1];
+                b = clusteredPixels[i][2];
+            }
 
-                if (LAB)
-                {
-                    var rgb = LabHelper.LabToRgb(pixel[0], pixel[1], pixel[2]);
-                    color = Color.FromArgb(255, (byte)rgb[0], (byte) rgb[1], (byte) rgb[2]);
-                }
-                else
-                {
-                    color = Color.FromArgb(255, (byte)pixel[0], (byte)pixel[1], (byte)pixel[2]);
-                }
+            int idx = i * 4;
+            outputPtr[idx] = (byte)Math.Clamp(b, 0, 255);
+            outputPtr[idx + 1] = (byte)Math.Clamp(g, 0, 255);
+            outputPtr[idx + 2] = (byte)Math.Clamp(r, 0, 255);
+            outputPtr[idx + 3] = 255;
 
-                ptr[i * 4] = color.B;     // B
-                ptr[i * 4 + 1] = color.G; // G
-                ptr[i * 4 + 2] = color.R; // R
-                ptr[i * 4 + 3] = 255;     // A
-
+            var color = Color.FromArgb(255, (byte)Math.Clamp(r, 0, 255), 
+                                       (byte)Math.Clamp(g, 0, 255), 
+                                       (byte)Math.Clamp(b, 0, 255));
+            lock (colorCounts)
+            {
                 if (!colorCounts.TryAdd(color, 1))
                     colorCounts[color]++;
             }
-        }
+        });
 
-        return processedBitmap;
+        return outputBitmap;
+    }
+
+    private float CalcDistance(float[] p1, float[] p2)
+    {
+        float sum = 0;
+        for (int i = 0; i < p1.Length; i++)
+            sum += (p1[i] - p2[i]) * (p1[i] - p2[i]);
+        return sum;
     }
 }

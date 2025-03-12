@@ -53,7 +53,7 @@ public class MedianCut
 
         Parallel.For(0, pixels.Length, i =>
         {
-            var closestColor = FindClosestColor(pixels[i], representativeColors, useLAB);
+            var closestColor = FindClosestColor(pixels[i], representativeColors);
 
             float r, g, b;
             if (useLAB)
@@ -172,7 +172,7 @@ public class MedianCut
         return bin.Average(p => (p[dim] - mean) * (p[dim] - mean));
     }
 
-    private float[] FindClosestColor(float[] pixel, float[][] palette, bool useLAB)
+    private float[] FindClosestColor(float[] pixel, float[][] palette)
     {
         float minDistance = float.MaxValue;
         float[] closest = null;
@@ -181,7 +181,7 @@ public class MedianCut
         {
             float dist = EuclideanDistance(pixel, color);
             // AI reccomends I use a custom LabDistance function but I find that rather pointless, although it
-            // does mean I can avoid sqrt operations.
+            // does mean I can avoid sqrt operations. Though tests so far have pointed to that being pointless.
             if (dist < minDistance)
             {
                 minDistance = dist;
@@ -194,6 +194,7 @@ public class MedianCut
 
     private float EuclideanDistance(float[] p1, float[] p2)
     {
+        // This isn't bottle necked, so don't bother!
         return (float)Math.Sqrt((p1[0] - p2[0]) * (p1[0] - p2[0]) +
                                 (p1[1] - p2[1]) * (p1[1] - p2[1]) +
                                 (p1[2] - p2[2]) * (p1[2] - p2[2]));

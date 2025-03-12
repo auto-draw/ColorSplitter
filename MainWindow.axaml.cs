@@ -54,8 +54,6 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        Config.init();
-
         ImageSplitting.backgroundColor = new Color(255, 0, 0, 0);
         AlphaColor.Background = new SolidColorBrush(ImageSplitting.backgroundColor);
 

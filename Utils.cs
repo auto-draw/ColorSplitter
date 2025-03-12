@@ -21,28 +21,6 @@ public static class ImageExtensions
         {
             return new Bitmap(AssetLoader.Open(resourceUri));
         }
-
-        public static async Task<Bitmap?> LoadFromWeb(Uri url)
-        {
-            using var httpClient = new HttpClient();
-            try
-            {
-                var response = await httpClient.GetAsync(url);
-                response.EnsureSuccessStatusCode();
-                var data = await response.Content.ReadAsByteArrayAsync();
-                return new Bitmap(new MemoryStream(data));
-            }
-            catch (HttpRequestException ex)
-            {
-                Console.WriteLine($"An error occurred while downloading image '{url}' : {ex.Message}");
-                return null;
-            }
-        }
-    }
-
-    public static int bwRGB(byte r, byte b, byte g)
-    {
-        return (r << 16) | (g << 8) | b;
     }
     
     public static Bitmap ConvertToAvaloniaBitmap(this SKBitmap bitmap)
@@ -69,8 +47,7 @@ public static class ImageExtensions
 
     public static unsafe SKBitmap NormalizeColor(this SKBitmap SourceBitmap)
     {
-        var srcColor = SourceBitmap.ColorType;
-        var srcAlpha = SourceBitmap.AlphaType;
+        var srcColor = SourceBitmap.ColorType;;
 
         if (srcColor == SKColorType.Bgra8888) return SourceBitmap;
         // Ensure we don't need to normalize it.
@@ -82,8 +59,6 @@ public static class ImageExtensions
 
         var width = OutputBitmap.Width;
         var height = OutputBitmap.Height;
-
-        var outColor = OutputBitmap.ColorType;
         
         Console.WriteLine(srcColor);
 
@@ -133,14 +108,6 @@ public class Config
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AutoDraw");
 
     public static string ConfigPath = Path.Combine(FolderPath, "config.json");
-    public static string ThemesPath = Path.Combine(FolderPath, "Themes");
-
-    public static void init()
-    {
-        if (!File.Exists(ConfigPath)) return;
-
-        //Utils.Copy(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Styles"), ThemesPath);
-    }
 
     public static string? GetEntry(string entry)
     {
@@ -148,40 +115,5 @@ public class Config
         var json = File.ReadAllText(ConfigPath);
         var parse = JObject.Parse(json);
         return (string?)parse[entry];
-    }
-}
-
-public static class Utils
-{
-    public static string LogFolder = Path.Combine(Config.FolderPath, "logs");
-    public static string LogsPath = Path.Combine(LogFolder, $"{DateTime.Now:dd.MM.yyyy}.txt");
-    public static bool LoggingEnabled = Config.GetEntry("logsEnabled") == "True";
-    public static StreamWriter? LogObject;
-
-    public static void Copy(string sourceDirectory, string targetDirectory)
-    {
-        var diSource = new DirectoryInfo(sourceDirectory);
-        var diTarget = new DirectoryInfo(targetDirectory);
-        CopyAll(diSource, diTarget);
-    }
-
-    public static void CopyAll(DirectoryInfo source, DirectoryInfo target)
-    {
-        Directory.CreateDirectory(target.FullName);
-
-        // Copy each file into the new directory.
-        foreach (var fi in source.GetFiles())
-        {
-            Console.WriteLine(@"Copying {0}\{1}", target.FullName, fi.Name);
-            fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
-        }
-
-        // Copy each subdirectory using recursion.
-        foreach (var diSourceSubDir in source.GetDirectories())
-        {
-            var nextTargetSubDir =
-                target.CreateSubdirectory(diSourceSubDir.Name);
-            CopyAll(diSourceSubDir, nextTargetSubDir);
-        }
     }
 }

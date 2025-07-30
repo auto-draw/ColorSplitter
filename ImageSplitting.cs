@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -32,7 +32,8 @@ public class ImageSplitting
                 int Iterations = argument == null ? 4 : (int)argument;
                 var kMeans = new KMeans(Colors, Iterations);
                 kMeans.InitializationAlgorithm = (KMeans.ClusterAlgorithm)argument2;
-                (quantizedBitmap, colorDictionary) = kMeans.ApplyKMeans(accessedBitmap, lab);
+                // Use the super-pixel enhanced variant for smoother regions.
+                (quantizedBitmap, colorDictionary) = kMeans.ApplyKMeansWithSuperpixels(accessedBitmap, superPixelCount: Colors * 80, LAB: lab);
                 break;
             case Algorithm.MedianCut:
                 var medianCut = new MedianCut();

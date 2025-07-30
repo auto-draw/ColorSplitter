@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,12 +21,68 @@ public class KMeans(int clusters, int iterations)
     public (SKBitmap ClusteredBitmap, Dictionary<Color, int> ColorCounts) ApplyKMeans(SKBitmap bitmap, bool LAB = false)
     {
         var pixels = ExtractPixels(bitmap, LAB);
-
         var clusteredPixels = PerformKMeans(pixels, clusters, iterations, LAB);
-
         var colorCounts = new Dictionary<Color, int>();
         var clusteredBitmap = ClusterBitmap(clusteredPixels, bitmap.Width, bitmap.Height, LAB, colorCounts);
+        return (clusteredBitmap, colorCounts);
+    }
 
+    /// <summary>
+    /// A smoother variant that first groups pixels into super-pixels using a simplified SLIC implementation in OKLab space.
+    /// Each super-pixel is then represented by its mean colour and clustered with k-means. Finally every pixel inherits the
+    /// colour of the k-means centroid assigned to its parent super-pixel – this guarantees local colour consistency and
+    /// produces significantly cleaner borders.
+    /// </summary>
+    /// <param name="bitmap">Input image (not modified).</param>
+    /// <param name="superPixelCount">Target number of super-pixels – values between 400-2000 work well for most images.</param>
+    /// <param name="compactness">The SLIC compactness / M parameter: larger values favour compact shapes.</param>
+    /// <param name="LAB">Operate internally in OKLab (recommended) – set to <c>false</c> to use RGB.</param>
+    public (SKBitmap ClusteredBitmap, Dictionary<Color, int> ColorCounts) ApplyKMeansWithSuperpixels(
+        SKBitmap bitmap,
+        int superPixelCount = 200,
+        float compactness = 10f,
+        bool LAB = true)
+    {
+        // 1. Run SLIC to obtain label map.
+        var seeds = new SeedsSuperpixels(superPixelCount, iterationsPerLevel: 60);
+        int[] labels;
+        int actualSuperPixelCount = seeds.Generate(bitmap, out labels);
+
+        // 2. Convert to working colour space.
+        var pixels = ExtractPixels(bitmap, LAB);
+
+        // 3. Compute mean colour for every super-pixel.
+        var channelCount = pixels[0].Length;
+        float[][] superPixelMeans = new float[actualSuperPixelCount][];
+        int[] counts = new int[actualSuperPixelCount];
+        for (int i = 0; i < actualSuperPixelCount; i++)
+            superPixelMeans[i] = new float[channelCount];
+
+        for (int p = 0; p < pixels.Length; p++)
+        {
+            int lbl = labels[p];
+            counts[lbl]++;
+            for (int c = 0; c < channelCount; c++)
+                superPixelMeans[lbl][c] += pixels[p][c];
+        }
+        for (int s = 0; s < actualSuperPixelCount; s++)
+            if (counts[s] > 0)
+                for (int c = 0; c < channelCount; c++)
+                    superPixelMeans[s][c] /= counts[s];
+
+        // 4. Cluster the super-pixel colours (weights ignored for speed – we assume similarly-sized regions).
+        var clusteredSuperPixelColours = PerformKMeans(superPixelMeans, clusters, iterations, LAB);
+
+        // 5. Map back to full-resolution pixel list.
+        float[][] clusteredPixels = new float[pixels.Length][];
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            clusteredPixels[i] = clusteredSuperPixelColours[labels[i]];
+        }
+
+        // 6. Build bitmap and colour histogram.
+        var colorCounts = new Dictionary<Color, int>();
+        var clusteredBitmap = ClusterBitmap(clusteredPixels, bitmap.Width, bitmap.Height, LAB, colorCounts);
         return (clusteredBitmap, colorCounts);
     }
 
@@ -117,7 +173,20 @@ public class KMeans(int clusters, int iterations)
             });
         }
 
-        return assignments.Select(clusterId => centroids[clusterId]).ToArray();
+        // --- Ensure that no cluster is empty ------------------------------------
+    // Collect which clusters received at least one pixel.
+    var used = new bool[clusterCount];
+    foreach (int c in assignments) used[c] = true;
+    for (int k = 0; k < clusterCount; k++)
+    {
+        if (used[k]) continue;
+        // Pick a random pixel and assign it exclusively to this empty cluster.
+        int idx = random.Next(pixelCount);
+        assignments[idx] = k;
+        centroids[k] = pixels[idx];
+    }
+
+    return assignments.Select(c => centroids[c]).ToArray();
     }
 
     private float[][] InitializeKMeansPP(float[][] pixels, int clusterCount, Random random)
